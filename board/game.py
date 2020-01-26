@@ -1,4 +1,5 @@
 from pieces import Pawn, King, Queen, Bishop, Knight, Rook, En_passant
+import copy
 #WHITE = 0
 #BLACK = 1
 dizionario = {"A": 0, "a": 0, "B": 1, "b": 1, "C": 2, "c": 2, "D": 3, "d": 3, "E": 4, "e": 4, "F": 5, "f": 5, "G": 6, "g": 6, "H": 7, "h": 7}
@@ -95,10 +96,42 @@ def check_enpassant(pos, to):
             game.gameboard[d] = En_passant(1)
             en_passant.append(d)
 
+def check_check(color, gameboard):
+    pedine_bianche = []
+    pedine_nere = []
+    pos_not_avaiable = []
+    pos_w_K = ()
+    pos_b_k = ()
+    for i in range(8):
+        for j in range(8):
+            if (piece := gameboard[(i,j)]) is not None:
+                if not piece.get_color():
+                    pedine_bianche.append(((i,j),piece))
+                    if piece.get_type() == 'K':
+                        pos_w_K = (i,j)
+                else:
+                    pedine_nere.append(((i,j),piece))
+                    if piece.get_type() == 'k':
+                        pos_b_k = (i,j)
+    if not color:
+        for piece in pedine_bianche:
+            piece[1].get_take_moves(piece[0], gameboard)
+            pos_not_avaiable = piece[1].can_take
+            if pos_b_k in pos_not_avaiable:
+                return True
+    else:
+        for piece in pedine_nere:
+            piece[1].get_take_moves(piece[0], gameboard)
+            pos_not_avaiable = piece[1].can_take
+            if pos_w_K in pos_not_avaiable:
+                return True
+    return False
+
 game = Game()
 en_passant = []
 def main():
     msg = ''
+    check = False
     while True:
         game.print_board()
         print(msg)
@@ -108,29 +141,64 @@ def main():
         
         if target:
             if target.get_color() != game.player_turn:
-                msg = 'muovi le pedine del tuo colore dio porco'
+                msg = 'Muovi le pedine del tuo colore dio porco'
                 continue
-            target.find_valid_moves(pos, game.gameboard)
-            if target.is_valid(to):
-                msg = 'mossa valida'
-                game.gameboard[pos] = None
-                game.gameboard[to] = target
-                if len(en_passant) == 1:
-                    if game.gameboard[en_passant[0]].get_type() == 'E' or game.gameboard[en_passant[0]].get_type() == 'e':
-                        del game.gameboard[en_passant[0]]
-                        game.gameboard[en_passant[0]] = None
-                    en_passant.clear()
-                if target.get_type() == 'P' or target.get_type() == 'p':
-                    check_promotion(target, to)
-                    check_enpassant(pos, to)
-                if game.player_turn:
-                    game.player_turn = 0
+            if not check:
+                target.find_valid_moves(pos, game.gameboard)
+                if target.is_valid(to):
+                    mod_gameboard = copy.copy(game.gameboard)
+                    mod_gameboard[pos] = None
+                    mod_gameboard[to] = target
+                    if not check_check((not target.get_color()), mod_gameboard):
+                        msg = 'Mossa valida'
+                        game.gameboard[pos] = None
+                        game.gameboard[to] = target
+                        if len(en_passant) == 1:
+                            if game.gameboard[en_passant[0]].get_type() == 'E' or game.gameboard[en_passant[0]].get_type() == 'e':
+                                del game.gameboard[en_passant[0]]
+                                game.gameboard[en_passant[0]] = None
+                            en_passant.clear()
+                        if target.get_type() == 'P' or target.get_type() == 'p':
+                            check_promotion(target, to)
+                            check_enpassant(pos, to)
+                        check = check_check(target.get_color(), game.gameboard)
+                        if game.player_turn:
+                            game.player_turn = 0
+                        else:
+                            game.player_turn = 1
+                    else:
+                        msg = 'Non puoi farti scacco da solo'
                 else:
-                    game.player_turn = 1
+                    msg = 'Mossa non valida'
             else:
-                msg = 'mossa non valida'
+                target.find_valid_moves(pos, game.gameboard)
+                if target.is_valid(to):
+                    mod_gameboard = copy.copy(game.gameboard)
+                    mod_gameboard[pos] = None
+                    mod_gameboard[to] = target
+                    if not check_check((not target.get_color()), mod_gameboard):
+                        msg = 'Mossa valida'
+                        game.gameboard[pos] = None
+                        game.gameboard[to] = target
+                        if len(en_passant) == 1:
+                            if game.gameboard[en_passant[0]].get_type() == 'E' or game.gameboard[en_passant[0]].get_type() == 'e':
+                                del game.gameboard[en_passant[0]]
+                                game.gameboard[en_passant[0]] = None
+                            en_passant.clear()
+                        if target.get_type() == 'P' or target.get_type() == 'p':
+                            check_promotion(target, to)
+                            check_enpassant(pos, to)
+                        check = check_check(target.get_color(), game.gameboard)
+                        if game.player_turn:
+                            game.player_turn = 0
+                        else:
+                            game.player_turn = 1
+                    else:
+                        msg = 'Sei in scacco'
+                else:
+                    msg = 'Mossa non valida'
         else:
-            msg = 'pedina non trovata'
+            msg = 'Pedina non trovata'
             target = None
 
 if __name__ == "__main__":
