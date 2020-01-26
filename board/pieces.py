@@ -1,10 +1,21 @@
+import copy
+
 class Pawn:
     def __init__(self, color):
         self.color = int(color)
         self.avaiable_moves = []
+        self.can_take = []
+
+    def get_take_moves(self, pos, board):
+        if len(self.can_take):
+            self.find_valid_moves(pos, board)
+            return self.can_take
+        else:
+            return None
 
     def find_valid_moves(self, pos, board):
         self.avaiable_moves.clear()
+        self.can_take.clear()
         if not self.color:
             d = (pos[0], pos[1]+1)
             if board[d] == None:
@@ -16,10 +27,12 @@ class Pawn:
                 d = (pos[0]+1, pos[1]+1)
                 if board[d] and board[d].get_color() != self.get_color():
                     self.avaiable_moves.append(d)
+                    self.can_take.append(d)
             d = (pos[0]-1, pos[1]+1)
             if pos[0] != 0:
                 if board[d] and board[d].get_color() != self.get_color():
                     self.avaiable_moves.append(d)
+                    self.can_take.append(d)
         else:
             d = (pos[0], pos[1]-1)
             if board[d] == None:
@@ -31,10 +44,12 @@ class Pawn:
                 d = (pos[0]+1, pos[1]-1)
                 if board[d] and board[d].get_color() != self.get_color():
                     self.avaiable_moves.append(d)
+                    self.can_take.append(d)
             d = (pos[0]-1, pos[1]-1)
             if pos[0] != 0:
                 if board[d] and board[d].get_color() != self.get_color():
                     self.avaiable_moves.append(d)
+                    self.can_take.append(d)
 
     def is_valid(self, to):
         if to in self.avaiable_moves:
@@ -56,11 +71,103 @@ class Pawn:
 class King:
     def __init__(self, color):
         self.color = color
+        self.lista = []
         self.avaiable_moves = []
+        self.can_take = []
+
+    def get_take_moves(self, pos, board):
+        return None
 
     def find_valid_moves(self, pos, board):
         self.avaiable_moves.clear()
-        #finire
+        self.can_take.clear()
+        #up
+        posx = pos[0]
+        posy = pos[1] + 1
+        if posy < 8:
+            if board[(posx,posy)]:
+                if board[(posx,posy)].get_color() != self.get_color():
+                    self.lista.append((posx,posy))
+                    self.can_take.append((posx,posy))
+            else:
+                self.lista.append((posx,posy))
+        #down
+        posx = pos[0]
+        posy = pos[1] - 1
+        if posy >= 0:
+            if board[(posx,posy)]:
+                if board[(posx,posy)].get_color() != self.get_color():
+                    self.lista.append((posx,posy))
+                    self.can_take.append((posx,posy))
+            else:
+                self.lista.append((posx,posy))
+        #right
+        posx = pos[0] + 1
+        posy = pos[1]
+        if posx < 8:
+            if board[(posx,posy)]:
+                if board[(posx,posy)].get_color() != self.get_color():
+                    self.lista.append((posx,posy))
+                    self.can_take.append((posx,posy))
+            else:
+                self.lista.append((posx,posy))
+        #left
+        posx = pos[0] - 1
+        posy = pos[1]
+        if posx >= 0:
+            if board[(posx,posy)]:
+                if board[(posx,posy)].get_color() != self.get_color():
+                    self.lista.append((posx,posy))
+                    self.can_take.append((posx,posy))
+            else:
+                self.lista.append((posx,posy))
+        #up-right
+        posx = pos[0] + 1
+        posy = pos[1] + 1
+        if posx < 8 and posy < 8:
+            if board[(posx,posy)]:
+                if board[(posx,posy)].get_color() != self.get_color():
+                    self.lista.append((posx,posy))
+                    self.can_take.append((posx,posy))
+            else:
+                self.lista.append((posx,posy))
+        #up-left
+        posx = pos[0] - 1
+        posy = pos[1] + 1
+        if posx >= 0 and posy < 8:
+            if board[(posx,posy)]:
+                if board[(posx,posy)].get_color() != self.get_color():
+                    self.lista.append((posx,posy))
+                    self.can_take.append((posx,posy))
+            else:
+                self.lista.append((posx,posy))
+        #down-left
+        posx = pos[0] - 1
+        posy = pos[1] - 1
+        if posx >= 0 and posy >= 0:
+            if board[(posx,posy)]:
+                if board[(posx,posy)].get_color() != self.get_color():
+                    self.lista.append((posx,posy))
+                    self.can_take.append((posx,posy))
+            else:
+                self.lista.append((posx,posy))
+        #down-right
+        posx = pos[0] + 1
+        posy = pos[1] - 1
+        if posx < 8 and posy >= 0:
+            if board[(posx,posy)]:
+                if board[(posx,posy)].get_color() != self.get_color():
+                    self.lista.append((posx,posy))
+                    self.can_take.append((posx,posy))
+            else:
+                self.lista.append((posx,posy))
+        #controllo se nelle posizioni disponibili sarebbe scacco
+        for move in self.lista:
+            mod_board = copy.copy(board)
+            mod_board[move] = self
+            mod_board[pos] = None
+            if not check_check((not self.get_color()), mod_board):
+                self.avaiable_moves.append(move)
 
     def is_valid(self, to):
         if to in self.avaiable_moves:
@@ -83,9 +190,18 @@ class Queen:
     def __init__(self, color):
         self.color = color
         self.avaiable_moves = []
+        self.can_take = []
+
+    def get_take_moves(self, pos, board):
+        if len(self.can_take):
+            self.find_valid_moves(pos, board)
+            return self.can_take
+        else:
+            return None
 
     def find_valid_moves(self, pos, board):
         self.avaiable_moves.clear()
+        self.can_take.clear()
         #up-right
         posx = pos[0] + 1
         posy = pos[1] + 1
@@ -93,6 +209,7 @@ class Queen:
             if board[(posx,posy)]:
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
+                    self.can_take.append((posx,posy))
                     break
                 else:
                     break
@@ -107,6 +224,7 @@ class Queen:
             if board[(posx,posy)]:
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
+                    self.can_take.append((posx,posy))
                     break
                 else:
                     break
@@ -121,6 +239,7 @@ class Queen:
             if board[(posx,posy)]:
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
+                    self.can_take.append((posx,posy))
                     break
                 else:
                     break
@@ -135,6 +254,7 @@ class Queen:
             if board[(posx,posy)]:
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
+                    self.can_take.append((posx,posy))
                     break
                 else:
                     break
@@ -148,6 +268,7 @@ class Queen:
             if board[(pos[0],posizione)]:
                 if board[(pos[0],posizione)].get_color() != self.get_color():
                     self.avaiable_moves.append((pos[0],posizione))
+                    self.can_take.append((pos[0],posizione))
                     break
                 else:
                     break
@@ -160,6 +281,7 @@ class Queen:
             if board[(pos[0],posizione)]:
                 if board[(pos[0],posizione)].get_color() != self.get_color():
                     self.avaiable_moves.append((pos[0],posizione))
+                    self.can_take.append((pos[0],posizione))
                     break
                 else:
                     break
@@ -172,6 +294,7 @@ class Queen:
             if board[(posizione,pos[1])]:
                 if board[(posizione,pos[1])].get_color() != self.get_color():
                     self.avaiable_moves.append((posizione,pos[1]))
+                    self.can_take.append((posizione,pos[1]))
                     break
                 else:
                     break
@@ -184,6 +307,7 @@ class Queen:
             if board[(posizione,pos[1])]:
                 if board[(posizione,pos[1])].get_color() != self.get_color():
                     self.avaiable_moves.append((posizione,pos[1]))
+                    self.can_take.append((posizione,pos[1]))
                     break
                 else:
                     break
@@ -212,9 +336,18 @@ class Bishop:
     def __init__(self, color):
         self.color = color
         self.avaiable_moves = []
+        self.can_take = []
+
+    def get_take_moves(self, pos, board):
+        if len(self.can_take):
+            self.find_valid_moves(pos, board)
+            return self.can_take
+        else:
+            return None
 
     def find_valid_moves(self, pos, board):
         self.avaiable_moves.clear()
+        self.can_take.clear()
         #up-right
         posx = pos[0] + 1
         posy = pos[1] + 1
@@ -222,6 +355,7 @@ class Bishop:
             if board[(posx,posy)]:
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
+                    self.can_take.append((posx,posy))
                     break
                 else:
                     break
@@ -236,6 +370,7 @@ class Bishop:
             if board[(posx,posy)]:
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
+                    self.can_take.append((posx,posy))
                     break
                 else:
                     break
@@ -250,6 +385,7 @@ class Bishop:
             if board[(posx,posy)]:
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
+                    self.can_take.append((posx,posy))
                     break
                 else:
                     break
@@ -264,6 +400,7 @@ class Bishop:
             if board[(posx,posy)]:
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
+                    self.can_take.append((posx,posy))
                     break
                 else:
                     break
@@ -293,15 +430,26 @@ class Knight:
     def __init__(self, color):
         self.color = color
         self.avaiable_moves = []
+        self.can_take = []
+
+    def get_take_moves(self, pos, board):
+        if len(self.can_take):
+            self.find_valid_moves(pos, board)
+            return self.can_take
+        else:
+            return None
 
     def find_valid_moves(self, pos, board):
         self.avaiable_moves.clear()
+        self.can_take.clear()
         knight_moves = [(pos[0]-1,pos[1]+2), (pos[0]+1,pos[1]+2), (pos[0]-1,pos[1]-2), (pos[0]+1,pos[1]-2), (pos[0]-2,pos[1]+1), (pos[0]-2,pos[1]-1), (pos[0]+2,pos[1]+1), (pos[0]+2,pos[1]-1)]
         for move in knight_moves:
             if not (((move[0] < 0) or (move[0] > 7)) or ((move[1] < 0) or (move[1] > 7))):
                 if board[move] and board[move].get_color() != self.get_color():
                     self.avaiable_moves.append(move)
-                self.avaiable_moves.append(move)
+                    self.can_take.append(move)
+                else:
+                    self.avaiable_moves.append(move)
 
     def is_valid(self, to):
         if to in self.avaiable_moves:
@@ -324,15 +472,25 @@ class Rook:
     def __init__(self, color):
         self.color = color
         self.avaiable_moves = []
+        self.can_take = []
+
+    def get_take_moves(self, pos, board):
+        if len(self.can_take):
+            self.find_valid_moves(pos, board)
+            return self.can_take
+        else:
+            return None
 
     def find_valid_moves(self, pos, board):
         self.avaiable_moves.clear()
+        self.can_take.clear()
         #up
         posizione = pos[1] + 1
         while posizione < 8:
             if board[(pos[0],posizione)]:
                 if board[(pos[0],posizione)].get_color() != self.get_color():
                     self.avaiable_moves.append((pos[0],posizione))
+                    self.can_take.append((pos[0],posizione))
                     break
                 else:
                     break
@@ -345,6 +503,7 @@ class Rook:
             if board[(pos[0],posizione)]:
                 if board[(pos[0],posizione)].get_color() != self.get_color():
                     self.avaiable_moves.append((pos[0],posizione))
+                    self.can_take.append((pos[0],posizione))
                     break
                 else:
                     break
@@ -357,6 +516,7 @@ class Rook:
             if board[(posizione,pos[1])]:
                 if board[(posizione,pos[1])].get_color() != self.get_color():
                     self.avaiable_moves.append((posizione,pos[1]))
+                    self.can_take.append((posizione,pos[1]))
                     break
                 else:
                     break
@@ -369,6 +529,7 @@ class Rook:
             if board[(posizione,pos[1])]:
                 if board[(posizione,pos[1])].get_color() != self.get_color():
                     self.avaiable_moves.append((posizione,pos[1]))
+                    self.can_take.append((posizione,pos[1]))
                     break
                 else:
                     break
@@ -396,6 +557,11 @@ class Rook:
 class En_passant:
     def __init__(self, color):
         self.color = int(color)
+        self.avaiable_moves = []
+        self.can_take = []
+
+    def get_take_moves(self, pos, board):
+        return None
 
     def get_color(self):
         return self.color
@@ -408,3 +574,34 @@ class En_passant:
 
     def print(self):
         print('e')
+
+def check_check(color, gameboard):
+    pedine_bianche = []
+    pedine_nere = []
+    pos_not_avaiable = []
+    pos_w_K = ()
+    pos_b_k = ()
+    for i in range(8):
+        for j in range(8):
+            if (piece := gameboard[(i,j)]) is not None:
+                if not piece.get_color():
+                    pedine_bianche.append(((i,j),piece))
+                    if piece.get_type() == 'K':
+                        pos_w_K = (i,j)
+                else:
+                    pedine_nere.append(((i,j),piece))
+                    if piece.get_type() == 'k':
+                        pos_b_k = (i,j)
+    if not color:
+        for piece in pedine_bianche:
+            piece[1].get_take_moves(piece[0], gameboard)
+            pos_not_avaiable = piece[1].can_take
+            if pos_b_k in pos_not_avaiable:
+                return True
+    else:
+        for piece in pedine_nere:
+            piece[1].get_take_moves(piece[0], gameboard)
+            pos_not_avaiable = piece[1].can_take
+            if pos_w_K in pos_not_avaiable:
+                return True
+    return False
