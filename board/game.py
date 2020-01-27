@@ -96,12 +96,19 @@ def check_enpassant(pos, to):
             game.gameboard[d] = En_passant(1)
             en_passant.append(d)
 
+def check_mate(pos, gameboard):
+    gameboard[pos].find_valid_moves(pos, gameboard)
+    if len(gameboard[pos].avaiable_moves) == 0:
+        print('CHECKMATE')
+        exit()
+
 def check_check(color, gameboard):
     pedine_bianche = []
     pedine_nere = []
     pos_not_avaiable = []
-    pos_w_K = ()
-    pos_b_k = ()
+    global pos_w_K
+    global pos_b_k
+    global color_check
     for i in range(8):
         for j in range(8):
             if (piece := gameboard[(i,j)]) is not None:
@@ -116,17 +123,22 @@ def check_check(color, gameboard):
     if not color:
         for piece in pedine_bianche:
             piece[1].get_take_moves(piece[0], gameboard)
-            pos_not_avaiable = piece[1].can_take
+            pos_not_avaiable = piece[1].avaiable_moves
             if pos_b_k in pos_not_avaiable:
+                color_check = color
                 return True
     else:
         for piece in pedine_nere:
             piece[1].get_take_moves(piece[0], gameboard)
-            pos_not_avaiable = piece[1].can_take
+            pos_not_avaiable = piece[1].avaiable_moves
             if pos_w_K in pos_not_avaiable:
+                color_check = color
                 return True
     return False
 
+color_check = None
+pos_w_K = ()
+pos_b_k = ()
 game = Game()
 en_passant = []
 def main():
@@ -162,6 +174,11 @@ def main():
                             check_promotion(target, to)
                             check_enpassant(pos, to)
                         check = check_check(target.get_color(), game.gameboard)
+                        if check:
+                            if not color_check:
+                                check_mate(pos_b_k, game.gameboard)
+                            else:
+                                check_mate(pos_w_K, game.gameboard)
                         if game.player_turn:
                             game.player_turn = 0
                         else:
@@ -189,6 +206,11 @@ def main():
                             check_promotion(target, to)
                             check_enpassant(pos, to)
                         check = check_check(target.get_color(), game.gameboard)
+                        if check:
+                            if not color_check:
+                                check_mate(pos_b_k, game.gameboard)
+                            else:
+                                check_mate(pos_w_K, game.gameboard)
                         if game.player_turn:
                             game.player_turn = 0
                         else:
