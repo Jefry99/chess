@@ -7,11 +7,8 @@ class Pawn:
         self.can_take = []
 
     def get_take_moves(self, pos, board):
-        if len(self.can_take):
-            self.find_valid_moves(pos, board)
-            return self.can_take
-        else:
-            return None
+        self.find_valid_moves(pos, board)
+        return self.avaiable_moves
 
     def find_valid_moves(self, pos, board):
         self.avaiable_moves.clear()
@@ -76,10 +73,11 @@ class King:
         self.can_take = []
 
     def get_take_moves(self, pos, board):
-        return None
+        self.avaiable_moves = [(pos[0]+1,pos[1]),(pos[0]-1,pos[1]),(pos[0],pos[1]+1),(pos[0],pos[1]-1),(pos[0]+1,pos[1]+1),(pos[0]-1,pos[1]-1),(pos[0]-1,pos[1]+1),(pos[0]+1,pos[1]-1)]
 
     def find_valid_moves(self, pos, board):
         self.avaiable_moves.clear()
+        self.lista.clear()
         self.can_take.clear()
         #up
         posx = pos[0]
@@ -165,6 +163,7 @@ class King:
         for move in self.lista:
             mod_board = copy.copy(board)
             mod_board[move] = self
+            del mod_board[pos]
             mod_board[pos] = None
             if not check_check((not self.get_color()), mod_board):
                 self.avaiable_moves.append(move)
@@ -193,11 +192,8 @@ class Queen:
         self.can_take = []
 
     def get_take_moves(self, pos, board):
-        if len(self.can_take):
-            self.find_valid_moves(pos, board)
-            return self.can_take
-        else:
-            return None
+        self.find_valid_moves(pos, board)
+        return self.avaiable_moves
 
     def find_valid_moves(self, pos, board):
         self.avaiable_moves.clear()
@@ -339,11 +335,8 @@ class Bishop:
         self.can_take = []
 
     def get_take_moves(self, pos, board):
-        if len(self.can_take):
-            self.find_valid_moves(pos, board)
-            return self.can_take
-        else:
-            return None
+        self.find_valid_moves(pos, board)
+        return self.avaiable_moves
 
     def find_valid_moves(self, pos, board):
         self.avaiable_moves.clear()
@@ -433,11 +426,8 @@ class Knight:
         self.can_take = []
 
     def get_take_moves(self, pos, board):
-        if len(self.can_take):
-            self.find_valid_moves(pos, board)
-            return self.can_take
-        else:
-            return None
+        self.find_valid_moves(pos, board)
+        return self.avaiable_moves
 
     def find_valid_moves(self, pos, board):
         self.avaiable_moves.clear()
@@ -475,11 +465,8 @@ class Rook:
         self.can_take = []
 
     def get_take_moves(self, pos, board):
-        if len(self.can_take):
-            self.find_valid_moves(pos, board)
-            return self.can_take
-        else:
-            return None
+        self.find_valid_moves(pos, board)
+        return self.avaiable_moves
 
     def find_valid_moves(self, pos, board):
         self.avaiable_moves.clear()
@@ -595,13 +582,13 @@ def check_check(color, gameboard):
     if not color:
         for piece in pedine_bianche:
             piece[1].get_take_moves(piece[0], gameboard)
-            pos_not_avaiable = piece[1].can_take
-            if pos_b_k in pos_not_avaiable:
+            pos_not_avaiable = piece[1].avaiable_moves
+            if pos_b_k in pos_not_avaiable or pos_b_k in gameboard[pos_w_K].avaiable_moves:
                 return True
     else:
         for piece in pedine_nere:
             piece[1].get_take_moves(piece[0], gameboard)
-            pos_not_avaiable = piece[1].can_take
-            if pos_w_K in pos_not_avaiable:
+            pos_not_avaiable = piece[1].avaiable_moves
+            if pos_w_K in pos_not_avaiable or pos_w_K in gameboard[pos_b_k].avaiable_moves:
                 return True
     return False
