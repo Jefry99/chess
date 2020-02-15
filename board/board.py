@@ -1,7 +1,6 @@
 import tkinter as tk
-from tkinter import Frame, Label, Canvas
+from tkinter import Frame, Button, Label, Canvas
 from game import Game
-import time
 
 matrice1 = [['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'], ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'], ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']]
 pezzi = {'R':'WhiteRook', 'N':'WhiteKnight', 'B':'WhiteBishop', 'Q':'WhiteQueen', 'K':'WhiteKing', 'P':'WhitePawn', 'r':'BlackRook', 'n':'BlackKnight', 'b':'BlackBishop', 'q':'BlackQueen', 'k':'BlackKing', 'p':'BlackPawn'}
@@ -51,67 +50,53 @@ class CreateCanvasObject(object):
             self.to = (int(event.x/70), 7-int(event.y/70))
             if self.scacchiera.game.chech_move(self.pos, self.to):
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
-                self.canvas.delete(self.image_obj)
-                del self
+                self.rimuovi()
                 #CreateCanvasObject(self.canvas, self.image_name, 35+70*(quadro[0]), 35+70*(quadro[1]), self.scacchiera)
                 #self.canvas.delete(self.image_obj)
                 #del self
             else:
-                CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera)
-                self.canvas.delete(self.image_obj)
-                del self
+                a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera)
+                self.scacchiera.pezzi.append(a)
+                self.rimuovi()
             #self.canvas.itemconfig(self.canvas.find_withtag('ciao0', fill='blue')
             #print(self.canvas.find_withtag('ciao{}'.format(quadro)))
             #print(self.canvas.coords(self.canvas.find_withtag('ciao1')))
         else:
-            CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera)
-            self.canvas.delete(self.image_obj)
-            del self
+            a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera)
+            self.scacchiera.pezzi.append(a)
+            self.rimuovi()
 
 class Scacchiera(Frame):
-    def __init__(self, matrice):
+    def __init__(self):
         self.window = tk.Tk()
         self.window.geometry('770x770')
         self.window.title('Chess by Jefry')
-        self.window.configure(bg='grey', padx=70, pady=70)
+        self.window.configure(bg='grey', padx=65, pady=30)
         self.window.resizable(False, False)
         self.frame2 = Frame(self.window, bg='grey', padx=10, pady=10)
         self.frame3 = Frame(self.window, bg='grey', padx=10)
+        self.frame4 = Frame(self.window, bg='grey', pady=25)
         self.canvas = Canvas(self.window, width=556, height=556, bg='#edd9b9', highlightbackground="light grey")
         self.canvas.grid(row=0, column=0)
         self.make()
         self.ready = False
         self.pezzi = []
-        self.put_piece(matrice)
         self.game = Game()
-    '''
-    # switch state
-    def switch_wait_state(self, event):
-        self.wait_state = not self.wait_state
-        print('Wait state switched to: %s ' % self.wait_state)
+        self.put_piece(self.game.make_matrix())
 
-    # init events
-    def init_events(self):
-        self.bind('<Key>', self.wait)
-        self.bind('<Control-s>', self.switch_wait_state)
+    def reset_all(self):
+        del self.game
+        self.game = Game()
+        self.pulisci_scacchiera()
+        self.pezzi.clear()
+        self.put_piece(self.game.make_matrix())
 
-    # waiter(listener) for keypress
-    def wait(self, event):
-        if self.wait_state and any(key == event.keysym for key in ['Left', 'Right']):
-            print('I have successfully waited until %s keypress!' % event.keysym)
-            self.do_smth(event.keysym)
-        else:
-            print('Wait state: %s , KeyPress: %s' % (self.wait_state, event.keysym))
-            self.do_nhth()
+    def undo(self):
+        self.game.undo()
+        self.pulisci_scacchiera()
+        self.pezzi.clear()
+        self.put_piece(self.game.make_matrix())
 
-    @staticmethod
-    def do_smth(side):
-        print("Don't be rude with me, Im trying my best on a %s side!" % side)
-
-    @staticmethod
-    def do_nhth():
-        pass
-    '''
     def pulisci_scacchiera(self):
         for pezzo in self.pezzi:
             try:
@@ -131,6 +116,7 @@ class Scacchiera(Frame):
     def make(self):
         self.frame2.grid(row=0, column=1)
         self.frame3.grid(row=1, column=0)
+        self.frame4.grid(row=2, column=0)
         cont = 0
         num = 0
         for n in range(1, 9):
@@ -168,6 +154,9 @@ class Scacchiera(Frame):
         Label(self.frame2, text='3', bg='grey', font=('Helvetica', 40)).grid(row=5, column=0, pady=8)
         Label(self.frame2, text='2', bg='grey', font=('Helvetica', 40)).grid(row=6, column=0, pady=8)
         Label(self.frame2, text='1', bg='grey', font=('Helvetica', 40)).grid(row=7, column=0, pady=8)
+        Button(self.frame4, text='RESET', font=('Helvetica', 20), command=self.reset_all, padx=20).grid(row=0, column=0)
+        Frame(self.frame4, bg='grey', width=100).grid(row=0, column=1)
+        Button(self.frame4, text='UNDO', font=('Helvetica', 20), command=self.undo, padx=20).grid(row=0, column=2)
 
 if __name__ == "__main__":
-    Scacchiera(matrice1).window.mainloop()
+    Scacchiera().window.mainloop()
