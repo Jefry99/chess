@@ -9,7 +9,7 @@
 Clone the repository with <code>git clone https://github.com/Jefry99/chess</code>.<br>
 <br>
 <pre>
-git clone https://www.github.com/ytisf/theZoo
+git clone https://github.com/Jefry99/chess
 cd chess/board
 </pre>
 
