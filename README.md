@@ -2,4 +2,4 @@
 
 Python 3.8+
 
-No requirements
+<h2>No requirements</h2>
