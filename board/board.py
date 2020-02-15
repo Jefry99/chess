@@ -4,6 +4,7 @@ from game import Game
 
 matrice1 = [['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'], ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'], ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']]
 pezzi = {'R':'WhiteRook', 'N':'WhiteKnight', 'B':'WhiteBishop', 'Q':'WhiteQueen', 'K':'WhiteKing', 'P':'WhitePawn', 'r':'BlackRook', 'n':'BlackKnight', 'b':'BlackBishop', 'q':'BlackQueen', 'k':'BlackKing', 'p':'BlackPawn'}
+BACKGROUND = '#909090'
 
 class CreateCanvasObject(object):
     def __init__(self, canvas, image_name, xpos, ypos, scacchiera):
@@ -48,7 +49,7 @@ class CreateCanvasObject(object):
         self.move_flag = False
         if event.x > 0 and event.y > 0 and event.x < 556 and event.y < 556:
             self.to = (int(event.x/70), 7-int(event.y/70))
-            if self.scacchiera.game.chech_move(self.pos, self.to):
+            if self.scacchiera.game.check_move(self.pos, self.to):
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
                 self.rimuovi()
                 #CreateCanvasObject(self.canvas, self.image_name, 35+70*(quadro[0]), 35+70*(quadro[1]), self.scacchiera)
@@ -69,13 +70,13 @@ class CreateCanvasObject(object):
 class Scacchiera(Frame):
     def __init__(self):
         self.window = tk.Tk()
-        self.window.geometry('770x770')
+        self.window.geometry('770x760')
         self.window.title('Chess by Jefry')
-        self.window.configure(bg='grey', padx=65, pady=30)
+        self.window.configure(bg=BACKGROUND, padx=65, pady=30)
         self.window.resizable(False, False)
-        self.frame2 = Frame(self.window, bg='grey', padx=10, pady=10)
-        self.frame3 = Frame(self.window, bg='grey', padx=10)
-        self.frame4 = Frame(self.window, bg='grey', pady=25)
+        self.frame2 = Frame(self.window, bg=BACKGROUND, padx=10, pady=10)
+        self.frame3 = Frame(self.window, bg=BACKGROUND, padx=10)
+        self.frame4 = Frame(self.window, bg=BACKGROUND, pady=25)
         self.canvas = Canvas(self.window, width=556, height=556, bg='#edd9b9', highlightbackground="light grey")
         self.canvas.grid(row=0, column=0)
         self.make()
@@ -90,12 +91,14 @@ class Scacchiera(Frame):
         self.pulisci_scacchiera()
         self.pezzi.clear()
         self.put_piece(self.game.make_matrix())
+        print('Resetted')
 
     def undo(self):
         self.game.undo()
         self.pulisci_scacchiera()
         self.pezzi.clear()
         self.put_piece(self.game.make_matrix())
+        print('Undo')
 
     def pulisci_scacchiera(self):
         for pezzo in self.pezzi:
@@ -138,24 +141,24 @@ class Scacchiera(Frame):
                     c += 1
                     num += 1
             cont += 1
-        Label(self.frame3, text='A', bg='grey', font=('Helvetica', 40)).grid(row=0, column=0, padx=16)
-        Label(self.frame3, text='B', bg='grey', font=('Helvetica', 40)).grid(row=0, column=1, padx=16)
-        Label(self.frame3, text='C', bg='grey', font=('Helvetica', 40)).grid(row=0, column=2, padx=16)
-        Label(self.frame3, text='D', bg='grey', font=('Helvetica', 40)).grid(row=0, column=3, padx=16)
-        Label(self.frame3, text='E', bg='grey', font=('Helvetica', 40)).grid(row=0, column=4, padx=16)
-        Label(self.frame3, text='F', bg='grey', font=('Helvetica', 40)).grid(row=0, column=5, padx=16)
-        Label(self.frame3, text='G', bg='grey', font=('Helvetica', 40)).grid(row=0, column=6, padx=16)
-        Label(self.frame3, text='H', bg='grey', font=('Helvetica', 40)).grid(row=0, column=7, padx=16)
-        Label(self.frame2, text='8', bg='grey', font=('Helvetica', 40)).grid(row=0, column=0, pady=8)
-        Label(self.frame2, text='7', bg='grey', font=('Helvetica', 40)).grid(row=1, column=0, pady=8)
-        Label(self.frame2, text='6', bg='grey', font=('Helvetica', 40)).grid(row=2, column=0, pady=8)
-        Label(self.frame2, text='5', bg='grey', font=('Helvetica', 40)).grid(row=3, column=0, pady=8)
-        Label(self.frame2, text='4', bg='grey', font=('Helvetica', 40)).grid(row=4, column=0, pady=8)
-        Label(self.frame2, text='3', bg='grey', font=('Helvetica', 40)).grid(row=5, column=0, pady=8)
-        Label(self.frame2, text='2', bg='grey', font=('Helvetica', 40)).grid(row=6, column=0, pady=8)
-        Label(self.frame2, text='1', bg='grey', font=('Helvetica', 40)).grid(row=7, column=0, pady=8)
+        Label(self.frame3, text='A', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=0, column=0, padx=16)
+        Label(self.frame3, text='B', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=0, column=1, padx=16)
+        Label(self.frame3, text='C', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=0, column=2, padx=16)
+        Label(self.frame3, text='D', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=0, column=3, padx=16)
+        Label(self.frame3, text='E', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=0, column=4, padx=16)
+        Label(self.frame3, text='F', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=0, column=5, padx=16)
+        Label(self.frame3, text='G', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=0, column=6, padx=16)
+        Label(self.frame3, text='H', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=0, column=7, padx=16)
+        Label(self.frame2, text='8', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=0, column=0, pady=8)
+        Label(self.frame2, text='7', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=1, column=0, pady=8)
+        Label(self.frame2, text='6', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=2, column=0, pady=8)
+        Label(self.frame2, text='5', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=3, column=0, pady=8)
+        Label(self.frame2, text='4', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=4, column=0, pady=8)
+        Label(self.frame2, text='3', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=5, column=0, pady=8)
+        Label(self.frame2, text='2', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=6, column=0, pady=8)
+        Label(self.frame2, text='1', bg=BACKGROUND, font=('Helvetica', 40)).grid(row=7, column=0, pady=8)
         Button(self.frame4, text='RESET', font=('Helvetica', 20), command=self.reset_all, padx=20).grid(row=0, column=0)
-        Frame(self.frame4, bg='grey', width=100).grid(row=0, column=1)
+        Frame(self.frame4, bg=BACKGROUND, width=100).grid(row=0, column=1)
         Button(self.frame4, text='UNDO', font=('Helvetica', 20), command=self.undo, padx=20).grid(row=0, column=2)
 
 if __name__ == "__main__":
