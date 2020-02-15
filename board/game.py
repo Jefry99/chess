@@ -1,6 +1,5 @@
 from pieces import Pawn, King, Queen, Bishop, Knight, Rook, En_passant
 import copy
-import time
 #WHITE = 0
 #BLACK = 1
 dizionario = {"A": 0, "a": 0, "B": 1, "b": 1, "C": 2, "c": 2, "D": 3, "d": 3, "E": 4, "e": 4, "F": 5, "f": 5, "G": 6, "g": 6, "H": 7, "h": 7}
@@ -184,7 +183,6 @@ class Game:
                     else:
                         del mod_gameboard[(to[0], to[1]+1)]
                         mod_gameboard[(to[0], to[1]+1)] = None
-                print_scacchiera(mod_gameboard)
                 if not check_check((not target.get_color()), mod_gameboard, self):
                     print('Mossa valida')
                     self.gameboard[pos] = None
