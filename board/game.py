@@ -1,5 +1,6 @@
 from pieces import Pawn, King, Queen, Bishop, Knight, Rook, En_passant
 import copy
+import time
 #WHITE = 0
 #BLACK = 1
 dizionario = {"A": 0, "a": 0, "B": 1, "b": 1, "C": 2, "c": 2, "D": 3, "d": 3, "E": 4, "e": 4, "F": 5, "f": 5, "G": 6, "g": 6, "H": 7, "h": 7}
@@ -18,6 +19,22 @@ class Game:
         self.pedine_nere = []
         self.en_passant = []
         self.check = False
+        self.b_kingside_cast = True
+        self.b_queenside_cast = True
+        self.w_kingside_cast = True
+        self.w_queenside_cast = True
+        self.history = []
+        self.history.append(copy.deepcopy(self.gameboard))
+        self.num_move = 0
+
+    def undo(self):
+        if self.num_move != 0:
+            self.num_move -= 1
+            self.gameboard = copy.deepcopy(self.history[self.num_move])
+            if self.player_turn:
+                self.player_turn = 0
+            else:
+                self.player_turn = 1
         
     def chech_move(self, pos, to):
         try:
@@ -29,6 +46,130 @@ class Game:
             if target.get_color() != self.player_turn:
                 print('Muovi le pedine del tuo colore dio porco')
                 return 0
+            tipo = target.get_type()
+            if tipo == 'K' or tipo == 'k':
+                if tipo == 'K':
+                    if self.w_kingside_cast and to == (pos[0]+2,pos[1]):
+                        if check_kingside_cast(target.get_color(), copy.deepcopy(self.gameboard), self):
+                            self.w_kingside_cast = False
+                            self.w_queenside_cast = False
+                            self.gameboard[pos] = None
+                            self.gameboard[to] = target
+                            self.gameboard[(7,0)] = None
+                            self.gameboard[(5,0)] = Rook(0)
+                            if len(self.en_passant):
+                                if self.gameboard[self.en_passant[0]].get_type() == 'E' or self.gameboard[self.en_passant[0]].get_type() == 'e':
+                                    del self.gameboard[self.en_passant[0]]
+                                    self.gameboard[self.en_passant[0]] = None
+                                self.en_passant.clear()
+                            check = check_check(target.get_color(), self.gameboard, self)
+                            '''
+                            if check:
+                                if not self.color_check:
+                                    check_mate(self.pos_b_k, self.gameboard)
+                                else:
+                                    check_mate(self.pos_w_K, self.gameboard)
+                            '''
+                            if self.player_turn:
+                                self.player_turn = 0
+                            else:
+                                self.player_turn = 1
+                            self.num_move += 1
+                            return 1
+                        else:
+                            print('Arrocco non possibile')
+                            return 0
+                    elif self.w_queenside_cast and to == (pos[0]-2,pos[1]):
+                        if check_queenside_cast(target.get_color(), copy.deepcopy(self.gameboard), self):
+                            self.w_kingside_cast = False
+                            self.w_queenside_cast = False
+                            self.gameboard[pos] = None
+                            self.gameboard[to] = target
+                            self.gameboard[(0,0)] = None
+                            self.gameboard[(3,0)] = Rook(0)
+                            if len(self.en_passant):
+                                if self.gameboard[self.en_passant[0]].get_type() == 'E' or self.gameboard[self.en_passant[0]].get_type() == 'e':
+                                    del self.gameboard[self.en_passant[0]]
+                                    self.gameboard[self.en_passant[0]] = None
+                                self.en_passant.clear()
+                            check = check_check(target.get_color(), self.gameboard, self)
+                            '''
+                            if check:
+                                if not self.color_check:
+                                    check_mate(self.pos_b_k, self.gameboard)
+                                else:
+                                    check_mate(self.pos_w_K, self.gameboard)
+                            '''
+                            if self.player_turn:
+                                self.player_turn = 0
+                            else:
+                                self.player_turn = 1
+                            self.num_move += 1
+                            return 1
+                        else:
+                            print('Arrocco non possibile')
+                            return 0
+                else:
+                    if self.b_kingside_cast and to == (pos[0]+2,pos[1]):
+                        if check_kingside_cast(target.get_color(), copy.deepcopy(self.gameboard), self):
+                            self.w_kingside_cast = False
+                            self.w_queenside_cast = False
+                            self.gameboard[pos] = None
+                            self.gameboard[to] = target
+                            self.gameboard[(7,7)] = None
+                            self.gameboard[(5,7)] = Rook(1)
+                            if len(self.en_passant):
+                                if self.gameboard[self.en_passant[0]].get_type() == 'E' or self.gameboard[self.en_passant[0]].get_type() == 'e':
+                                    del self.gameboard[self.en_passant[0]]
+                                    self.gameboard[self.en_passant[0]] = None
+                                self.en_passant.clear()
+                            check = check_check(target.get_color(), self.gameboard, self)
+                            '''
+                            if check:
+                                if not self.color_check:
+                                    check_mate(self.pos_b_k, self.gameboard)
+                                else:
+                                    check_mate(self.pos_w_K, self.gameboard)
+                            '''
+                            if self.player_turn:
+                                self.player_turn = 0
+                            else:
+                                self.player_turn = 1
+                            self.num_move += 1
+                            return 1
+                        else:
+                            print('Arrocco non possibile')
+                            return 0
+                    elif self.b_queenside_cast and to == (pos[0]-2,pos[1]):
+                        if check_queenside_cast(target.get_color(), copy.deepcopy(self.gameboard), self):
+                            self.w_kingside_cast = False
+                            self.w_queenside_cast = False
+                            self.gameboard[pos] = None
+                            self.gameboard[to] = target
+                            self.gameboard[(0,7)] = None
+                            self.gameboard[(3,7)] = Rook(1)
+                            if len(self.en_passant):
+                                if self.gameboard[self.en_passant[0]].get_type() == 'E' or self.gameboard[self.en_passant[0]].get_type() == 'e':
+                                    del self.gameboard[self.en_passant[0]]
+                                    self.gameboard[self.en_passant[0]] = None
+                                self.en_passant.clear()
+                            check = check_check(target.get_color(), self.gameboard, self)
+                            '''
+                            if check:
+                                if not self.color_check:
+                                    check_mate(self.pos_b_k, self.gameboard)
+                                else:
+                                    check_mate(self.pos_w_K, self.gameboard)
+                            '''
+                            if self.player_turn:
+                                self.player_turn = 0
+                            else:
+                                self.player_turn = 1
+                            self.num_move += 1
+                            return 1
+                        else:
+                            print('Arrocco non possibile')
+                            return 0
 
             target.find_valid_moves(pos, self.gameboard)
             if target.is_valid(to):
@@ -36,8 +177,8 @@ class Game:
                 del mod_gameboard[pos]
                 mod_gameboard[pos] = None
                 mod_gameboard[to] = target
-                if len(self.en_passant) and (target.get_type() == 'P' or target.get_type() == 'p'):
-                    if not target.get_color():
+                if len(self.en_passant) and (tipo == 'P' or tipo == 'p'):
+                    if tipo == 'P':
                         del mod_gameboard[(to[0], to[1]-1)]
                         mod_gameboard[(to[0], to[1]-1)] = None
                     else:
@@ -48,21 +189,36 @@ class Game:
                     print('Mossa valida')
                     self.gameboard[pos] = None
                     self.gameboard[to] = target
-                    if len(self.en_passant) and (target.get_type() == 'P' or target.get_type() == 'p'):
-                        if not target.get_color():
-                            del mod_gameboard[(to[0], to[1]-1)]
-                            self.gameboard[(to[0], to[1]-1)] = None
-                        else:
-                            del mod_gameboard[(to[0], to[1]+1)]
-                            self.gameboard[(to[0], to[1]+1)] = None
-                    if len(self.en_passant) == 1:
+                    if len(self.en_passant):
+                        if tipo == 'P' or tipo == 'p':
+                            if not target.get_color():
+                                del mod_gameboard[(to[0], to[1]-1)]
+                                self.gameboard[(to[0], to[1]-1)] = None
+                            else:
+                                del mod_gameboard[(to[0], to[1]+1)]
+                                self.gameboard[(to[0], to[1]+1)] = None
                         if self.gameboard[self.en_passant[0]].get_type() == 'E' or self.gameboard[self.en_passant[0]].get_type() == 'e':
                             del self.gameboard[self.en_passant[0]]
                             self.gameboard[self.en_passant[0]] = None
                         self.en_passant.clear()
-                    if target.get_type() == 'P' or target.get_type() == 'p':
+                    if tipo == 'P' or tipo == 'p':
                         check_promotion(target, to, self)
                         check_enpassant(pos, to, self)
+                    elif tipo == 'R':
+                        if pos == (0,0):
+                            self.w_queenside_cast = False
+                        elif pos == (7,0):
+                            self.w_kingside_cast = False
+                    elif tipo == 'r':
+                        if pos == (0,7):
+                            self.b_queenside_cast = False
+                        elif pos == (7,7):
+                            self.b_kingside_cast = False
+                    elif tipo == 'K':
+                        self.w_kingside_cast = self.w_queenside_cast = False
+                    elif tipo == 'k':
+                        self.b_kingside_cast = self.b_queenside_cast = False
+                    
                     check = check_check(target.get_color(), self.gameboard, self)
                     '''
                     if check:
@@ -75,14 +231,19 @@ class Game:
                         self.player_turn = 0
                     else:
                         self.player_turn = 1
+                    self.num_move += 1
+                    try:
+                        self.history[self.num_move]
+                        self.history[self.num_move] = copy.deepcopy(self.gameboard)
+                    except:
+                        self.history.append(copy.deepcopy(self.gameboard))
                     return 1
                 else:
                     print('Non puoi farti scacco da solo')
                     return 0
             else:
                 print('Mossa non valida')
-                return 0
-            
+                return 0            
 
     def make_matrix(self):
         self.matrix.clear()
@@ -244,7 +405,7 @@ def check_check(color, gameboard, game):
     pos_not_avaiable = []
     for i in range(8):
         for j in range(8):
-            if (piece := gameboard[(i,j)]) is not None and gameboard[(i,j)].get_type() != 'e' and gameboard[(i,j)].get_type() != 'E':
+            if (piece := gameboard[(i,j)]) is not None:
                 if not piece.get_color():
                     game.pedine_bianche.append(((i,j),piece))
                     if piece.get_type() == 'K':
@@ -268,6 +429,70 @@ def check_check(color, gameboard, game):
                 game.color_check = color
                 return True
     return False
+
+def check_kingside_cast(color, gameboard, game):
+    if not color:
+        if gameboard[(5,0)] == None and gameboard[(6,0)] == None:
+            gameboard[(4,0)] = None
+            gameboard[(5,0)] = King(0)
+            if not check_check(not color, gameboard, game):
+                gameboard[(5,0)] = None
+                gameboard[(6,0)] = King(0)
+                if not check_check(not color, gameboard, game):
+                    return 1
+                else:
+                    return 0
+            else:
+                return 0
+        else:
+            return 0
+    else:
+        if gameboard[(5,7)] == None and gameboard[(6,7)] == None:
+            gameboard[(4,7)] = None
+            gameboard[(5,7)] = King(1)
+            if not check_check(not color, gameboard, game):
+                gameboard[(5,7)] = None
+                gameboard[(6,7)] = King(1)
+                if not check_check(not color, gameboard, game):
+                    return 1
+                else:
+                    return 0
+            else:
+                return 0
+        else:
+            return 0
+
+def check_queenside_cast(color, gameboard, game):
+    if not color:
+        if gameboard[(3,0)] == None and gameboard[(2,0)] == None:
+            gameboard[(4,0)] = None
+            gameboard[(3,0)] = King(0)
+            if not check_check(not color, gameboard, game):
+                gameboard[(3,0)] = None
+                gameboard[(2,0)] = King(0)
+                if not check_check(not color, gameboard, game):
+                    return 1
+                else:
+                    return 0
+            else:
+                return 0
+        else:
+            return 0
+    else:
+        if gameboard[(3,7)] == None and gameboard[(2,7)] == None:
+            gameboard[(4,7)] = None
+            gameboard[(3,7)] = King(1)
+            if not check_check(not color, gameboard, game):
+                gameboard[(3,7)] = None
+                gameboard[(2,7)] = King(1)
+                if not check_check(not color, gameboard, game):
+                    return 1
+                else:
+                    return 0
+            else:
+                return 0
+        else:
+            return 0
 
 def main():
     game = Game()
