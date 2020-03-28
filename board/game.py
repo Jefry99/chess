@@ -3,8 +3,10 @@ import copy
 #WHITE = 0
 #BLACK = 1
 dizionario = {"A": 0, "a": 0, "B": 1, "b": 1, "C": 2, "c": 2, "D": 3, "d": 3, "E": 4, "e": 4, "F": 5, "f": 5, "G": 6, "g": 6, "H": 7, "h": 7}
+check = False
 
 class Game:
+    
     def __init__(self):
         self.gameboard = {}
         self.player_turn = 0
@@ -18,7 +20,6 @@ class Game:
         self.pedine_bianche = []
         self.pedine_nere = []
         self.en_passant = []
-        self.check = False
         self.is_game_alive = True
         self.b_kingside_cast = True
         self.b_queenside_cast = True
@@ -70,9 +71,9 @@ class Game:
                                 check = check_check(target.get_color(), self.gameboard, self)
                                 if check:
                                     if not self.color_check:
-                                        check_mate(self.pos_b_k, self)
+                                        check_mate(self.pos_b_k, self, check)
                                     else:
-                                        check_mate(self.pos_w_K, self)
+                                        check_mate(self.pos_w_K, self, check)
                                 if self.player_turn:
                                     self.player_turn = 0
                                 else:
@@ -98,9 +99,9 @@ class Game:
                                 check = check_check(target.get_color(), self.gameboard, self)
                                 if check:
                                     if not self.color_check:
-                                        check_mate(self.pos_b_k, self)
+                                        check_mate(self.pos_b_k, self, check)
                                     else:
-                                        check_mate(self.pos_w_K, self)
+                                        check_mate(self.pos_w_K, self, check)
                                 if self.player_turn:
                                     self.player_turn = 0
                                 else:
@@ -127,9 +128,9 @@ class Game:
                                 check = check_check(target.get_color(), self.gameboard, self)
                                 if check:
                                     if not self.color_check:
-                                        check_mate(self.pos_b_k, self)
+                                        check_mate(self.pos_b_k, self, check)
                                     else:
-                                        check_mate(self.pos_w_K, self)
+                                        check_mate(self.pos_w_K, self, check)
                                 if self.player_turn:
                                     self.player_turn = 0
                                 else:
@@ -155,9 +156,9 @@ class Game:
                                 check = check_check(target.get_color(), self.gameboard, self)
                                 if check:
                                     if not self.color_check:
-                                        check_mate(self.pos_b_k, self)
+                                        check_mate(self.pos_b_k, self, check)
                                     else:
-                                        check_mate(self.pos_w_K, self)
+                                        check_mate(self.pos_w_K, self, check)
                                 if self.player_turn:
                                     self.player_turn = 0
                                 else:
@@ -218,9 +219,9 @@ class Game:
                         check = check_check(target.get_color(), self.gameboard, self)
                         if check:
                             if not self.color_check:
-                                check_mate(self.pos_b_k, self)
+                                check_mate(self.pos_b_k, self, check)
                             else:
-                                check_mate(self.pos_w_K, self)
+                                check_mate(self.pos_w_K, self, check)
                         if self.player_turn:
                             self.player_turn = 0
                         else:
@@ -361,7 +362,7 @@ def print_scacchiera(gameboard):
     print(' A  B  C  D  E  F  G  H')
     print('\n')
 
-def check_mate(pos, game):
+def check_mate(pos, game, check):
     mate = []
     if not game.color_check:
         for piece in game.pedine_nere:
@@ -422,6 +423,7 @@ def check_check(color, gameboard, game):
             pos_not_avaiable = piece[1].can_take
             if game.pos_b_k in pos_not_avaiable:
                 game.color_check = color
+                check = True
                 return True
     else:
         for piece in game.pedine_nere:
@@ -429,6 +431,7 @@ def check_check(color, gameboard, game):
             pos_not_avaiable = piece[1].can_take
             if game.pos_w_K in pos_not_avaiable:
                 game.color_check = color
+                check = True
                 return True
     return False
 
