@@ -382,7 +382,6 @@ def check_mate(pos, game, check):
         for piece in pedine_nere:
             piece[1].find_valid_moves(piece[0], game.gameboard)
             for mossa in piece[1].avaiable_moves:
-                print(mossa)
                 del mod_gameboard
                 mod_gameboard = copy.deepcopy(game.gameboard)
                 del mod_gameboard[piece[0]]
@@ -391,7 +390,6 @@ def check_mate(pos, game, check):
                 check1 = False
                 if check_check(game.color_check, mod_gameboard, game):
                     check1 = True
-                print(check1)
                 if not check1:
                     break
             if check1:
@@ -416,7 +414,6 @@ def check_mate(pos, game, check):
                 mate.append(1)
             else:
                 mate.append(0)
-    print(mate)
     if 0 not in mate:
         print('CHECKMATE')
         game.endgame()
