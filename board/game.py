@@ -480,7 +480,6 @@ def check_check(color, gameboard, game):
             pos_not_avaiable = piece[1].can_take
             if game.pos_b_k in pos_not_avaiable:
                 game.color_check = color
-                check = True
                 return True
     else:
         for piece in game.pedine_nere:
@@ -488,7 +487,6 @@ def check_check(color, gameboard, game):
             pos_not_avaiable = piece[1].can_take
             if game.pos_w_K in pos_not_avaiable:
                 game.color_check = color
-                check = True
                 return True
     return False
 

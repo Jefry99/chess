@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import Frame, Button, Label, Canvas
 from game import Game
+import time
 
 matrice1 = [['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'], ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'], ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']]
 pezzi = {'R':'WhiteRook', 'N':'WhiteKnight', 'B':'WhiteBishop', 'Q':'WhiteQueen', 'K':'WhiteKing', 'P':'WhitePawn', 'r':'BlackRook', 'n':'BlackKnight', 'b':'BlackBishop', 'q':'BlackQueen', 'k':'BlackKing', 'p':'BlackPawn'}
@@ -56,8 +57,9 @@ class CreateCanvasObject(object):
                 #self.canvas.delete(self.image_obj)
                 #del self
             elif var == 2:
-                tipo = self.scacchiera.select_promotion()
-                self.scacchiera.game.after_promotion(tipo)
+                self.scacchiera.select_promotion()
+                self.scacchiera.window.wait_window(self.scacchiera.frame6)
+                self.scacchiera.game.after_promotion(self.scacchiera.promozione)
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
                 self.rimuovi()
             else:
@@ -79,22 +81,67 @@ class Scacchiera(Frame):
         self.frame3 = None
         self.frame4 = None
         self.frame5 = None
+        self.frame6 = None
         self.canvas = None
         self.label = True
         self.pezzi = []
         self.game = None
         self.home = None
         self.make_home()
+        self.img = []
+        self.promozione = None
+
+    def after_selection(self, promotion):
+        self.promozione = promotion
+        print(self.promozione)
+        self.img = []
+        self.canvas.config(state='normal')
+        self.frame6.destroy()
 
     def select_promotion(self):
-        self.canvas.create_rectangle(0, 208, 558, 350, fill='#edd9b9', outline='light grey')
-        return 'Q'
+        self.canvas.config(state='disabled')
+        self.frame6 = Frame(self.window, bg='white', height=90, width=420)
+        self.frame6.grid(row=0, column=0)
+        if not self.game.player_turn:
+            self.img.append(tk.PhotoImage(file='png/WhiteQueen.png'))
+            self.img.append(tk.PhotoImage(file='png/WhiteRook.png'))
+            self.img.append(tk.PhotoImage(file='png/WhiteBishop.png'))
+            self.img.append(tk.PhotoImage(file='png/WhiteKnight.png'))
+            a = Label(self.frame6, image=self.img[0])
+            a.grid(row=0, column=0)
+            a.bind("<Button-1>", lambda e,x = 'Q': self.after_selection(x))
+            b = Label(self.frame6, image=self.img[1])
+            b.grid(row=0, column=1)
+            b.bind("<Button-1>", lambda e,x = 'R': self.after_selection(x))
+            c = Label(self.frame6, image=self.img[2])
+            c.grid(row=0, column=2)
+            c.bind("<Button-1>", lambda e,x = 'B': self.after_selection(x))
+            d = Label(self.frame6, image=self.img[3])
+            d.grid(row=0, column=3)
+            d.bind("<Button-1>", lambda e,x = 'K': self.after_selection(x))
+        else:
+            self.img.append(tk.PhotoImage(file='png/BlackQueen.png'))
+            self.img.append(tk.PhotoImage(file='png/BlackRook.png'))
+            self.img.append(tk.PhotoImage(file='png/BlackBishop.png'))
+            self.img.append(tk.PhotoImage(file='png/BlackKnight.png'))
+            a = Label(self.frame6, image=self.img[0])
+            a.grid(row=0, column=0)
+            a.bind("<Button-1>", lambda e,x = 'q': self.after_selection(x))
+            b = Label(self.frame6, image=self.img[1])
+            b.grid(row=0, column=1)
+            b.bind("<Button-1>", lambda e,x = 'r': self.after_selection(x))
+            c = Label(self.frame6, image=self.img[2])
+            c.grid(row=0, column=2)
+            c.bind("<Button-1>", lambda e,x = 'b': self.after_selection(x))
+            d = Label(self.frame6, image=self.img[3])
+            d.grid(row=0, column=3)
+            d.bind("<Button-1>", lambda e,x = 'k': self.after_selection(x))
 
     def staccah(self):
         self.home.quit()
 
     def coming_soon(self):
-        if self.label:
+        if self.label: 
             Label(self.frame5, text='COMING SOON!', pady=30, bg=BACKGROUND, font=('Helvetica', 40)).grid(row=3, column=0)
             self.label = False
 
