@@ -364,40 +364,59 @@ def print_scacchiera(gameboard):
 
 def check_mate(pos, game, check):
     mate = []
+    mod_gameboard = None
+    pedine_nere = []
+    pedine_bianche = []
+    for i in range(8):
+        for j in range(8):
+            if (piece := game.gameboard[(i,j)]) is not None:
+                if not piece.get_color():
+                    pedine_bianche.append(((i,j),piece))
+                    if piece.get_type() == 'K':
+                        game.pos_w_K = (i,j)
+                else:
+                    pedine_nere.append(((i,j),piece))
+                    if piece.get_type() == 'k':
+                        game.pos_b_k = (i,j)
     if not game.color_check:
-        for piece in game.pedine_nere:
+        for piece in pedine_nere:
             piece[1].find_valid_moves(piece[0], game.gameboard)
             for mossa in piece[1].avaiable_moves:
+                print(mossa)
+                del mod_gameboard
                 mod_gameboard = copy.deepcopy(game.gameboard)
                 del mod_gameboard[piece[0]]
-                mod_gameboard[mossa] = piece[1]
+                mod_gameboard[mossa] = copy.deepcopy(piece[1])
                 mod_gameboard[piece[0]] = None
-                check = False
+                check1 = False
                 if check_check(game.color_check, mod_gameboard, game):
-                    check = True
-                if check:
+                    check1 = True
+                print(check1)
+                if not check1:
                     break
-            if check:
+            if check1:
                 mate.append(1)
             else:
                 mate.append(0)
     else:
-        for piece in game.pedine_bianche:
+        for piece in pedine_bianche:
             piece[1].find_valid_moves(piece[0], game.gameboard)
             for mossa in piece[1].avaiable_moves:
+                del mod_gameboard
                 mod_gameboard = copy.deepcopy(game.gameboard)
                 del mod_gameboard[piece[0]]
                 mod_gameboard[mossa] = piece[1]
                 mod_gameboard[piece[0]] = None
-                check = False
+                check1 = False
                 if check_check(game.color_check, mod_gameboard, game):
-                    check = True
-                if check:
+                    check1 = True
+                if check1:
                     break
-            if check:
+            if not check1:
                 mate.append(1)
             else:
                 mate.append(0)
+    print(mate)
     if 0 not in mate:
         print('CHECKMATE')
         game.endgame()
