@@ -29,6 +29,9 @@ class Game:
         self.history.append(copy.deepcopy(self.gameboard))
         self.num_move = 0
 
+    def stall(self):
+        self.is_game_alive = False
+
     def endgame(self):
         self.is_game_alive = False
 
@@ -74,6 +77,8 @@ class Game:
                                         check_mate(self.pos_b_k, self, check)
                                     else:
                                         check_mate(self.pos_w_K, self, check)
+                                else:
+                                    chech_stall(self.player_turn, self)
                                 if self.player_turn:
                                     self.player_turn = 0
                                 else:
@@ -102,6 +107,8 @@ class Game:
                                         check_mate(self.pos_b_k, self, check)
                                     else:
                                         check_mate(self.pos_w_K, self, check)
+                                else:
+                                    chech_stall(self.player_turn, self)
                                 if self.player_turn:
                                     self.player_turn = 0
                                 else:
@@ -131,6 +138,8 @@ class Game:
                                         check_mate(self.pos_b_k, self, check)
                                     else:
                                         check_mate(self.pos_w_K, self, check)
+                                else:
+                                    chech_stall(self.player_turn, self)
                                 if self.player_turn:
                                     self.player_turn = 0
                                 else:
@@ -159,6 +168,8 @@ class Game:
                                         check_mate(self.pos_b_k, self, check)
                                     else:
                                         check_mate(self.pos_w_K, self, check)
+                                else:
+                                    chech_stall(self.player_turn, self)
                                 if self.player_turn:
                                     self.player_turn = 0
                                 else:
@@ -222,6 +233,8 @@ class Game:
                                 check_mate(self.pos_b_k, self, check)
                             else:
                                 check_mate(self.pos_w_K, self, check)
+                        else:
+                            chech_stall(self.player_turn, self)
                         if self.player_turn:
                             self.player_turn = 0
                         else:
@@ -367,6 +380,7 @@ def check_mate(pos, game, check):
     mod_gameboard = None
     pedine_nere = []
     pedine_bianche = []
+    check1 = False
     for i in range(8):
         for j in range(8):
             if (piece := game.gameboard[(i,j)]) is not None:
@@ -450,6 +464,21 @@ def check_check(color, gameboard, game):
                 check = True
                 return True
     return False
+
+def chech_stall(color, game):
+    if not color:
+        for piece in game.pedine_nere:
+            piece[1].find_valid_moves(piece[0], game.gameboard)
+            if len(piece[1].avaiable_moves) > 0:
+                return
+    else:
+        for piece in game.pedine_bianche:
+            piece[1].find_valid_moves(piece[0], game.gameboard)
+            if len(piece[1].avaiable_moves) > 0:
+                return
+    print('STALL')
+    game.stall()
+        
 
 def check_kingside_cast(color, gameboard, game):
     if not color:
