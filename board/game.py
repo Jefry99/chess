@@ -13,6 +13,7 @@ class Game:
         self.create_board()
         self.matrix = []
         self.make_matrix()
+        self.pos_of_promotion = None
         self.color_check = None
         self.pos_w_K = ()
         self.pos_b_k = ()
@@ -210,7 +211,8 @@ class Game:
                                 self.gameboard[self.en_passant[0]] = None
                             self.en_passant.clear()
                         if tipo == 'P' or tipo == 'p':
-                            check_promotion(target, to, self)
+                            if check_promotion(target, to, self):
+                                return 2
                             check_enpassant(pos, to, self)
                         elif tipo == 'R':
                             if pos == (0,0):
@@ -255,6 +257,44 @@ class Game:
         else:
             print('Game ended')
             return 0
+
+    def after_promotion(self, tipo):
+        if tipo == 'Q':
+            self.gameboard[self.pos_of_promotion] = Queen(0)
+        elif tipo == 'R':
+            self.gameboard[self.pos_of_promotion] = Rook(0)
+        elif tipo == 'K':
+            self.gameboard[self.pos_of_promotion] = Knight(0)
+        elif tipo == 'B':
+            self.gameboard[self.pos_of_promotion] = Bishop(0)
+        elif tipo == 'q':
+            self.gameboard[self.pos_of_promotion] = Queen(1)
+        elif tipo == 'r':
+            self.gameboard[self.pos_of_promotion] = Rook(1)
+        elif tipo == 'k':
+            self.gameboard[self.pos_of_promotion] = Knight(1)
+        elif tipo == 'b':
+            self.gameboard[self.pos_of_promotion] = Bishop(1)
+
+        check = check_check(self.player_turn, self.gameboard, self)
+        if check:
+            if not self.color_check:
+                check_mate(self.pos_b_k, self, check)
+            else:
+                check_mate(self.pos_w_K, self, check)
+        else:
+            chech_stall(self.player_turn, self)
+        if self.player_turn:
+            self.player_turn = 0
+        else:
+            self.player_turn = 1
+        self.num_move += 1
+        try:
+            self.history[self.num_move]
+            self.history[self.num_move] = copy.deepcopy(self.gameboard)
+        except:
+            self.history.append(copy.deepcopy(self.gameboard))
+        return 1
 
     def make_matrix(self):
         self.matrix.clear()
@@ -328,25 +368,12 @@ def double_input() -> ((int, int), (int, int)):
 
 def check_promotion(target, pos, game):
     if target.get_type() == 'P' and pos[1] == 7:
-        promotion = input("Choose promotion(Q R K B): ")
-        if promotion == 'Q':
-            game.gameboard[pos] = Queen(0)
-        elif promotion == 'R':
-            game.gameboard[pos] = Rook(0)
-        elif promotion == 'K':
-            game.gameboard[pos] = Knight(0)
-        elif promotion == 'B':
-            game.gameboard[pos] = Bishop(0)
+        game.pos_of_promotion = pos
+        return 1
     elif target.get_type() == 'p' and pos[1] == 0:
-        promotion = input("Choose promotion(q r k b): ")
-        if promotion == 'q':
-            game.gameboard[pos] = Queen(1)
-        elif promotion == 'r':
-            game.gameboard[pos] = Rook(1)
-        elif promotion == 'k':
-            game.gameboard[pos] = Knight(1)
-        elif promotion == 'b':
-            game.gameboard[pos] = Bishop(1)
+        game.pos_of_promotion = pos
+        return 1
+    return 0
 
 def check_enpassant(pos, to, game):
     if pos[1] == 1:

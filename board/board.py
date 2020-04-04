@@ -49,12 +49,17 @@ class CreateCanvasObject(object):
         self.move_flag = False
         if event.x > 0 and event.y > 0 and event.x < 556 and event.y < 556:
             self.to = (int(event.x/70), 7-int(event.y/70))
-            if self.scacchiera.game.check_move(self.pos, self.to):
+            if (var := self.scacchiera.game.check_move(self.pos, self.to)) == 1:
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
                 self.rimuovi()
                 #CreateCanvasObject(self.canvas, self.image_name, 35+70*(quadro[0]), 35+70*(quadro[1]), self.scacchiera)
                 #self.canvas.delete(self.image_obj)
                 #del self
+            elif var == 2:
+                tipo = self.scacchiera.select_promotion()
+                self.scacchiera.game.after_promotion(tipo)
+                self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
+                self.rimuovi()
             else:
                 a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera)
                 self.scacchiera.pezzi.append(a)
@@ -80,6 +85,10 @@ class Scacchiera(Frame):
         self.game = None
         self.home = None
         self.make_home()
+
+    def select_promotion(self):
+        self.canvas.create_rectangle(0, 208, 558, 350, fill='#edd9b9', outline='light grey')
+        return 'Q'
 
     def staccah(self):
         self.home.quit()
