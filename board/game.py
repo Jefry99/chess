@@ -294,7 +294,6 @@ class Game:
             self.history[self.num_move] = copy.deepcopy(self.gameboard)
         except:
             self.history.append(copy.deepcopy(self.gameboard))
-        return 1
 
     def make_matrix(self):
         self.matrix.clear()

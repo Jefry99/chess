@@ -26,7 +26,7 @@ class CreateCanvasObject(object):
     def rimuovi(self):
         self.canvas.delete(self.image_obj)
         del self
-         
+
     def start(self, event):
         self.pos = (int(event.x/70), 7-int(event.y/70))
         self.start_x = int(event.x/70)
@@ -61,6 +61,8 @@ class CreateCanvasObject(object):
                 self.scacchiera.window.wait_window(self.scacchiera.frame6)
                 self.scacchiera.game.after_promotion(self.scacchiera.promozione)
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
+                a = CreateCanvasObject(self.canvas, 'png/{}.png'.format(pezzi[self.scacchiera.promozione]), 35+70*self.to[0], 35+70*(7-self.to[1]), self.scacchiera)
+                self.scacchiera.pezzi.append(a)
                 self.rimuovi()
             else:
                 a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera)
@@ -93,7 +95,6 @@ class Scacchiera(Frame):
 
     def after_selection(self, promotion):
         self.promozione = promotion
-        print(self.promozione)
         self.img = []
         self.canvas.config(state='normal')
         self.frame6.destroy()
