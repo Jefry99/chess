@@ -69,9 +69,52 @@ class CreateCanvasObject(object):
 
 class Scacchiera(Frame):
     def __init__(self):
-        self.window = tk.Tk()
+        self.window = None
+        self.frame2 = None
+        self.frame3 = None
+        self.frame4 = None
+        self.frame5 = None
+        self.canvas = None
+        self.label = True
+        self.pezzi = []
+        self.game = None
+        self.home = None
+        self.make_home()
+
+    def staccah(self):
+        self.home.quit()
+
+    def coming_soon(self):
+        if self.label:
+            Label(self.frame5, text='COMING SOON!', pady=30, bg=BACKGROUND, font=('Helvetica', 40)).grid(row=3, column=0)
+            self.label = False
+
+    def nuova_partita(self):
+        self.make_scacchiera()
+        self.home.withdraw()
+
+    def make_mod(self):
+        self.frame5.grid(row=0, column=0)
+        self.home.grid_columnconfigure(0, weight=1)
+        self.home.grid_rowconfigure(0, weight=1)
+        Button(self.frame5, text='2 Player', font=('Helvetica', 20), command=self.nuova_partita, padx=20).grid(row=0, column=0)
+        Frame(self.frame5, bg=BACKGROUND, height=100).grid(row=1, column=0)
+        Button(self.frame5, text='Play vs AI', font=('Helvetica', 20), command=self.coming_soon, padx=20).grid(row=2, column=0)
+
+    def make_home(self):
+        self.home = tk.Tk()
+        self.home.geometry('500x500')
+        self.home.title('Chess by Jefry and Layneeeee')
+        self.home.configure(bg=BACKGROUND)
+        self.home.resizable(False, False)
+        self.frame5 = Frame(self.home, bg=BACKGROUND)
+        self.make_mod()
+
+    def make_scacchiera(self):
+        self.window = tk.Toplevel(self.home)
+        self.window.protocol("WM_DELETE_WINDOW", self.staccah)
         self.window.geometry('770x760')
-        self.window.title('Chess by Jefry')
+        self.window.title('Chess by Jefry and Layneeeee')
         self.window.configure(bg=BACKGROUND, padx=65, pady=30)
         self.window.resizable(False, False)
         self.frame2 = Frame(self.window, bg=BACKGROUND, padx=10, pady=10)
@@ -80,8 +123,6 @@ class Scacchiera(Frame):
         self.canvas = Canvas(self.window, width=556, height=556, bg='#edd9b9', highlightbackground="light grey")
         self.canvas.grid(row=0, column=0)
         self.make()
-        self.ready = False
-        self.pezzi = []
         self.game = Game()
         self.put_piece(self.game.make_matrix())
 
@@ -162,4 +203,4 @@ class Scacchiera(Frame):
         Button(self.frame4, text='UNDO', font=('Helvetica', 20), command=self.undo, padx=20).grid(row=0, column=2)
 
 if __name__ == "__main__":
-    Scacchiera().window.mainloop()
+    Scacchiera().home.mainloop()
