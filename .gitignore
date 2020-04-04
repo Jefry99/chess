@@ -1,0 +1,4 @@
+.DS_Store
+\board\__pycache__
+chess.code-workspace
+.vscode
