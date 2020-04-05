@@ -10,7 +10,7 @@ Clone the repository with <code>git clone https://github.com/Jefry99/chess</code
 <br>
 <pre>
 git clone https://github.com/Jefry99/chess
-cd chess/board
+cd board
 </pre>
 
 Start by running:
