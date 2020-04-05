@@ -3,7 +3,6 @@ import copy
 #WHITE = 0
 #BLACK = 1
 dizionario = {"A": 0, "a": 0, "B": 1, "b": 1, "C": 2, "c": 2, "D": 3, "d": 3, "E": 4, "e": 4, "F": 5, "f": 5, "G": 6, "g": 6, "H": 7, "h": 7}
-check = False
 
 class Game:
     
@@ -14,6 +13,7 @@ class Game:
         self.matrix = []
         self.make_matrix()
         self.pos_of_promotion = None
+        self.check = False
         self.color_check = None
         self.pos_w_K = ()
         self.pos_b_k = ()
@@ -57,7 +57,7 @@ class Game:
                     print('Muovi le pedine del tuo colore dio porco')
                     return 0
                 tipo = target.get_type()
-                if tipo == 'K' or tipo == 'k':
+                if ((tipo == 'K' or tipo == 'k') and (not self.check)):
                     if tipo == 'K':
                         if self.w_kingside_cast and to == (pos[0]+2,pos[1]):
                             if check_kingside_cast(target.get_color(), copy.deepcopy(self.gameboard), self):
@@ -72,12 +72,12 @@ class Game:
                                         del self.gameboard[self.en_passant[0]]
                                         self.gameboard[self.en_passant[0]] = None
                                     self.en_passant.clear()
-                                check = check_check(target.get_color(), self.gameboard, self)
-                                if check:
+                                self.check = check_check(target.get_color(), self.gameboard, self)
+                                if self.check:
                                     if not self.color_check:
-                                        check_mate(self.pos_b_k, self, check)
+                                        check_mate(self.pos_b_k, self, self.check)
                                     else:
-                                        check_mate(self.pos_w_K, self, check)
+                                        check_mate(self.pos_w_K, self, self.check)
                                 else:
                                     chech_stall(self.player_turn, self)
                                 if self.player_turn:
@@ -102,12 +102,12 @@ class Game:
                                         del self.gameboard[self.en_passant[0]]
                                         self.gameboard[self.en_passant[0]] = None
                                     self.en_passant.clear()
-                                check = check_check(target.get_color(), self.gameboard, self)
-                                if check:
+                                self.check = check_check(target.get_color(), self.gameboard, self)
+                                if self.check:
                                     if not self.color_check:
-                                        check_mate(self.pos_b_k, self, check)
+                                        check_mate(self.pos_b_k, self, self.check)
                                     else:
-                                        check_mate(self.pos_w_K, self, check)
+                                        check_mate(self.pos_w_K, self, self.check)
                                 else:
                                     chech_stall(self.player_turn, self)
                                 if self.player_turn:
@@ -122,8 +122,8 @@ class Game:
                     else:
                         if self.b_kingside_cast and to == (pos[0]+2,pos[1]):
                             if check_kingside_cast(target.get_color(), copy.deepcopy(self.gameboard), self):
-                                self.w_kingside_cast = False
-                                self.w_queenside_cast = False
+                                self.b_kingside_cast = False
+                                self.b_queenside_cast = False
                                 self.gameboard[pos] = None
                                 self.gameboard[to] = target
                                 self.gameboard[(7,7)] = None
@@ -133,12 +133,12 @@ class Game:
                                         del self.gameboard[self.en_passant[0]]
                                         self.gameboard[self.en_passant[0]] = None
                                     self.en_passant.clear()
-                                check = check_check(target.get_color(), self.gameboard, self)
-                                if check:
+                                self.check = check_check(target.get_color(), self.gameboard, self)
+                                if self.check:
                                     if not self.color_check:
-                                        check_mate(self.pos_b_k, self, check)
+                                        check_mate(self.pos_b_k, self, self.check)
                                     else:
-                                        check_mate(self.pos_w_K, self, check)
+                                        check_mate(self.pos_w_K, self, self.check)
                                 else:
                                     chech_stall(self.player_turn, self)
                                 if self.player_turn:
@@ -152,8 +152,8 @@ class Game:
                                 return 0
                         elif self.b_queenside_cast and to == (pos[0]-2,pos[1]):
                             if check_queenside_cast(target.get_color(), copy.deepcopy(self.gameboard), self):
-                                self.w_kingside_cast = False
-                                self.w_queenside_cast = False
+                                self.b_kingside_cast = False
+                                self.b_queenside_cast = False
                                 self.gameboard[pos] = None
                                 self.gameboard[to] = target
                                 self.gameboard[(0,7)] = None
@@ -163,12 +163,12 @@ class Game:
                                         del self.gameboard[self.en_passant[0]]
                                         self.gameboard[self.en_passant[0]] = None
                                     self.en_passant.clear()
-                                check = check_check(target.get_color(), self.gameboard, self)
-                                if check:
+                                self.check = check_check(target.get_color(), self.gameboard, self)
+                                if self.check:
                                     if not self.color_check:
-                                        check_mate(self.pos_b_k, self, check)
+                                        check_mate(self.pos_b_k, self, self.check)
                                     else:
-                                        check_mate(self.pos_w_K, self, check)
+                                        check_mate(self.pos_w_K, self, self.check)
                                 else:
                                     chech_stall(self.player_turn, self)
                                 if self.player_turn:
@@ -229,12 +229,12 @@ class Game:
                         elif tipo == 'k':
                             self.b_kingside_cast = self.b_queenside_cast = False
                         
-                        check = check_check(target.get_color(), self.gameboard, self)
-                        if check:
+                        self.check = check_check(target.get_color(), self.gameboard, self)
+                        if self.check:
                             if not self.color_check:
-                                check_mate(self.pos_b_k, self, check)
+                                check_mate(self.pos_b_k, self, self.check)
                             else:
-                                check_mate(self.pos_w_K, self, check)
+                                check_mate(self.pos_w_K, self, self.check)
                         else:
                             chech_stall(self.player_turn, self)
                         if self.player_turn:
