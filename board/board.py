@@ -40,9 +40,7 @@ class CreateCanvasObject(object):
             self.mouse_ypos = event.y
         else:
             new_xpos, new_ypos = event.x, event.y
-             
             self.canvas.move(self.image_obj,new_xpos-self.mouse_xpos ,new_ypos-self.mouse_ypos)
-             
             self.mouse_xpos = new_xpos
             self.mouse_ypos = new_ypos
  
