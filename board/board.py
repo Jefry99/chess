@@ -8,6 +8,14 @@ matrice1 = [['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'], ['P', 'P', 'P', 'P', 'P', 
 pezzi = {'R':'WhiteRook', 'N':'WhiteKnight', 'B':'WhiteBishop', 'Q':'WhiteQueen', 'K':'WhiteKing', 'P':'WhitePawn', 'r':'BlackRook', 'n':'BlackKnight', 'b':'BlackBishop', 'q':'BlackQueen', 'k':'BlackKing', 'p':'BlackPawn'}
 BACKGROUND = '#909090'
 
+class Timer(object):
+    def __init__(self, time, increase, label):
+        self.min = time
+        self.sec = 0
+        self.increase = increase
+        self.label = label
+        self.label['text'] = str(self.min) + ':' + '{0:0=2d}'.format(self.sec)
+
 class CreateCanvasObject(object):
     def __init__(self, canvas, image_name, xpos, ypos, scacchiera):
         self.canvas = canvas
@@ -93,6 +101,8 @@ class Scacchiera(Frame):
         self.img = []
         self.promozione = None
         self.tileSize = 70
+        self.white_timer = None
+        self.black_timer = None
 
     def after_selection(self, promotion):
         self.promozione = promotion
@@ -171,14 +181,14 @@ class Scacchiera(Frame):
     def make_scacchiera(self):
         self.window = tk.Toplevel(self.home)
         self.window.protocol("WM_DELETE_WINDOW", self.staccah)
-        self.window.geometry('1070x760')
+        self.window.geometry('1270x760')
         self.window.title('Chess by Jefry and Layneeeee')
         self.window.configure(bg = BACKGROUND, padx=65, pady=30)
         #self.window.resizable(False, False)
         self.frame2 = Frame(self.window, bg=BACKGROUND, padx=10, height = self.tileSize*8, width = 50)
         self.frame3 = Frame(self.window, bg = BACKGROUND, pady = 10, width = self.tileSize*8, height = 50)
         self.frame4 = Frame(self.window, bg=BACKGROUND, pady=25)
-        self.frame7 = Frame(self.window, bg=BACKGROUND, padx=25)
+        self.frame7 = Frame(self.window, bg=BACKGROUND, padx=70)
         self.canvas = Canvas(self.window, width=556, height=556, bg='#edd9b9', highlightbackground="light grey")
         self.canvas.grid(row=0, column=0)
         self.make()
@@ -282,14 +292,22 @@ class Scacchiera(Frame):
         Button(self.frame4, text='UNDO', font=('Helvetica', 20), command=self.undo, padx=20).grid(row=0, column=2)
         #frame7
         Label(self.frame7, text='Player 2', bg=BACKGROUND, font=('Helvetica', 20), pady=20).grid(row=0, column=0)
-        Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=0, column=1)
-        Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=0, column=2)
-        Button(self.frame7, text='\u270B', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=0, column=3)
-        Text(self.frame7, bg=BACKGROUND, font=('Helvetica', 20), width=25, height=10, pady=20).grid(row=1, column=0, columnspan=4)
+        Frame(self.frame7, bg=BACKGROUND, widt=60).grid(row=0, column=1)
+        b_timer = Label(self.frame7, text='', font=('Helvetica', 20), bg=BACKGROUND)
+        self.black_timer = Timer(20, 0, b_timer)
+        b_timer.grid(row=0, column=2)
+        Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=0, column=3)
+        Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=0, column=4)
+        Button(self.frame7, text='\u270B', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=0, column=5)
+        Text(self.frame7, bg=BACKGROUND, font=('Helvetica', 20), width=30, height=10, pady=20).grid(row=1, column=0, columnspan=6)
         Label(self.frame7, text='Player 1', bg=BACKGROUND, font=('Helvetica', 20), pady=20).grid(row=3, column=0)
-        Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=3, column=1)
-        Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=3, column=2)
-        Button(self.frame7, text='\u270B', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=3, column=3)
+        Frame(self.frame7, bg=BACKGROUND, widt=60).grid(row=3, column=1)
+        w_timer = Label(self.frame7, text='', font=('Helvetica', 20), bg=BACKGROUND)
+        self.white_timer = Timer(20, 0, w_timer)
+        w_timer.grid(row=3, column=2)
+        Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=3, column=3)
+        Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=3, column=4)
+        Button(self.frame7, text='\u270B', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=3, column=5)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
