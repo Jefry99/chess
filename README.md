@@ -18,3 +18,7 @@ Start by running:
 <pre>
 python board.py
 </pre>
+<br>
+For the developer argument -d start directly a game.
+<br>
+<code>python board.py -d</code>
