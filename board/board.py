@@ -9,12 +9,32 @@ pezzi = {'R':'WhiteRook', 'N':'WhiteKnight', 'B':'WhiteBishop', 'Q':'WhiteQueen'
 BACKGROUND = '#909090'
 
 class Timer(object):
-    def __init__(self, time, increase, label):
+    def __init__(self, time, increase, color, label, scacchiera):
+        self.scacchiera = scacchiera
+        self.home = scacchiera.home
         self.min = time
         self.sec = 0
+        self.color = color
+        self.run = False
         self.increase = increase
         self.label = label
         self.label['text'] = str(self.min) + ':' + '{0:0=2d}'.format(self.sec)
+
+    def start(self):
+        if self.run:
+            if self.sec == 0:
+                if self.min == 0:
+                    self.lose()
+                else:
+                    self.sec = 60
+                    self.min -= 1
+            self.sec -= 0.5
+            self.label['text'] = str(self.min) + ':' + '{0:0=2d}'.format(int(self.sec))
+            self.home.after(500, self.start)
+    
+    def lose(self):
+        self.scacchiera.running_timer.run = False
+        self.scacchiera.game.endgame()
 
 class CreateCanvasObject(object):
     def __init__(self, canvas, image_name, xpos, ypos, scacchiera):
@@ -58,18 +78,22 @@ class CreateCanvasObject(object):
         if event.x > 0 and event.y > 0 and event.x < 556 and event.y < 556:
             self.to = (int(event.x/70), 7-int(event.y/70))
             if (var := self.scacchiera.game.check_move(self.pos, self.to)) == 1:
+                self.scacchiera.flip_timer()
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
+                self.scacchiera.running_timer.start()
                 self.rimuovi()
                 #CreateCanvasObject(self.canvas, self.image_name, 35+70*(quadro[0]), 35+70*(quadro[1]), self.scacchiera)
                 #self.canvas.delete(self.image_obj)
                 #del self
             elif var == 2:
+                self.scacchiera.flip_timer()
                 self.scacchiera.select_promotion()
                 self.scacchiera.window.wait_window(self.scacchiera.frame6)
                 self.scacchiera.game.after_promotion(self.scacchiera.promozione)
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
                 a = CreateCanvasObject(self.canvas, 'png/{}.png'.format(pezzi[self.scacchiera.promozione]), 35+70*self.to[0], 35+70*(7-self.to[1]), self.scacchiera)
                 self.scacchiera.pezzi.append(a)
+                self.scacchiera.running_timer.start()
                 self.rimuovi()
             else:
                 a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera)
@@ -103,6 +127,17 @@ class Scacchiera(Frame):
         self.tileSize = 70
         self.white_timer = None
         self.black_timer = None
+        self.running_timer = None
+
+    def flip_timer(self):
+        if self.white_timer.run:
+            self.white_timer.run = False
+            self.black_timer.run = True
+            self.running_timer = self.black_timer
+        else:
+            self.black_timer.run = False
+            self.white_timer.run = True
+            self.running_timer = self.white_timer
 
     def after_selection(self, promotion):
         self.promozione = promotion
@@ -294,7 +329,7 @@ class Scacchiera(Frame):
         Label(self.frame7, text='Player 2', bg=BACKGROUND, font=('Helvetica', 20), pady=20).grid(row=0, column=0)
         Frame(self.frame7, bg=BACKGROUND, widt=60).grid(row=0, column=1)
         b_timer = Label(self.frame7, text='', font=('Helvetica', 20), bg=BACKGROUND)
-        self.black_timer = Timer(20, 0, b_timer)
+        self.black_timer = Timer(20, 0, 1, b_timer, self)
         b_timer.grid(row=0, column=2)
         Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=0, column=3)
         Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=0, column=4)
@@ -303,11 +338,13 @@ class Scacchiera(Frame):
         Label(self.frame7, text='Player 1', bg=BACKGROUND, font=('Helvetica', 20), pady=20).grid(row=3, column=0)
         Frame(self.frame7, bg=BACKGROUND, widt=60).grid(row=3, column=1)
         w_timer = Label(self.frame7, text='', font=('Helvetica', 20), bg=BACKGROUND)
-        self.white_timer = Timer(20, 0, w_timer)
+        self.white_timer = Timer(20, 0, 0, w_timer, self)
         w_timer.grid(row=3, column=2)
         Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=3, column=3)
         Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=3, column=4)
         Button(self.frame7, text='\u270B', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=3, column=5)
+        self.running_timer = self.white_timer
+        self.white_timer.run = True
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
