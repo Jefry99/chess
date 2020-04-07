@@ -36,6 +36,11 @@ class Timer(object):
         self.scacchiera.running_timer.run = False
         self.scacchiera.game.endgame()
 
+    def reset(self):
+        self.min = 20
+        self.sec = 0
+        self.label['text'] = str(self.min) + ':' + '{0:0=2d}'.format(int(self.sec))
+
 class CreateCanvasObject(object):
     def __init__(self, canvas, image_name, xpos, ypos, scacchiera):
         self.canvas = canvas
@@ -121,13 +126,25 @@ class Scacchiera(Frame):
         self.pezzi = []
         self.game = None
         self.home = None
-        self.make_home()
         self.img = []
         self.promozione = None
         self.tileSize = 70
         self.white_timer = None
         self.black_timer = None
         self.running_timer = None
+        self.stall_offer = None
+        self.button = []
+        self.make_home()
+
+    def stall(self, color, button):
+        if self.stall_offer == None:
+            self.stall_offer = color
+            button['state'] = 'disabled'
+        else:
+            self.running_timer.run = False
+            self.game.stall()
+            for but in self.button:
+                but['state'] = 'disabled'
 
     def flip_timer(self):
         if self.white_timer.run:
@@ -236,6 +253,13 @@ class Scacchiera(Frame):
         self.pulisci_scacchiera()
         self.pezzi.clear()
         self.put_piece(self.game.make_matrix())
+        for button in self.button:
+            button['state'] = 'normal'
+        self.stall_offer = None
+        self.running_timer = self.black_timer
+        self.white_timer.reset()
+        self.black_timer.reset()
+        self.black_timer.run = True
         print('Resetted')
 
     def undo(self):
@@ -332,8 +356,10 @@ class Scacchiera(Frame):
         self.black_timer = Timer(20, 0, 1, b_timer, self)
         b_timer.grid(row=0, column=2)
         Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=0, column=3)
-        Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=0, column=4)
-        Button(self.frame7, text='\u270B', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=0, column=5)
+        b1 = Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=1: self.stall(x, b1)), width=2, height=1, highlightthickness = 0)
+        b1.grid(row=0, column=4)
+        b2 = Button(self.frame7, text='\u270B', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0)
+        b2.grid(row=0, column=5)
         Text(self.frame7, bg=BACKGROUND, font=('Helvetica', 20), width=30, height=10, pady=20).grid(row=1, column=0, columnspan=6)
         Label(self.frame7, text='Player 1', bg=BACKGROUND, font=('Helvetica', 20), pady=20).grid(row=3, column=0)
         Frame(self.frame7, bg=BACKGROUND, widt=60).grid(row=3, column=1)
@@ -341,8 +367,14 @@ class Scacchiera(Frame):
         self.white_timer = Timer(20, 0, 0, w_timer, self)
         w_timer.grid(row=3, column=2)
         Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=3, column=3)
-        Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=3, column=4)
-        Button(self.frame7, text='\u270B', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=3, column=5)
+        b3 = Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=0: self.stall(x, b3)), width=2, height=1, highlightthickness = 0)
+        b3.grid(row=3, column=4)
+        b4 = Button(self.frame7, text='\u270B', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0)
+        b4.grid(row=3, column=5)
+        self.button.append(b1)
+        self.button.append(b2)
+        self.button.append(b3)
+        self.button.append(b4)
         self.running_timer = self.white_timer
         self.white_timer.run = True
 
