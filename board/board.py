@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import *
 from game import Game
+import sys
 import time
 
 matrice1 = [['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'], ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'], ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']]
@@ -82,6 +83,7 @@ class Scacchiera(Frame):
         self.frame4 = None
         self.frame5 = None
         self.frame6 = None
+        self.frame7 = None
         self.canvas = None
         self.label = True
         self.pezzi = []
@@ -169,13 +171,14 @@ class Scacchiera(Frame):
     def make_scacchiera(self):
         self.window = tk.Toplevel(self.home)
         self.window.protocol("WM_DELETE_WINDOW", self.staccah)
-        self.window.geometry('770x760')
+        self.window.geometry('1070x760')
         self.window.title('Chess by Jefry and Layneeeee')
         self.window.configure(bg = BACKGROUND, padx=65, pady=30)
         #self.window.resizable(False, False)
         self.frame2 = Frame(self.window, bg=BACKGROUND, padx=10, height = self.tileSize*8, width = 50)
         self.frame3 = Frame(self.window, bg = BACKGROUND, pady = 10, width = self.tileSize*8, height = 50)
         self.frame4 = Frame(self.window, bg=BACKGROUND, pady=25)
+        self.frame7 = Frame(self.window, bg=BACKGROUND, padx=25)
         self.canvas = Canvas(self.window, width=556, height=556, bg='#edd9b9', highlightbackground="light grey")
         self.canvas.grid(row=0, column=0)
         self.make()
@@ -217,6 +220,7 @@ class Scacchiera(Frame):
         self.frame2.grid(row=0, column=1)
         self.frame3.grid(row=1, column=0)
         self.frame4.grid(row=2, column=0)
+        self.frame7.grid(row=0, column=2)
         cont = 0
         num = 0
         for n in range(1, 9):
@@ -276,6 +280,25 @@ class Scacchiera(Frame):
         Button(self.frame4, text='RESET', font=('Helvetica', 20), command=self.reset_all, padx=20).grid(row=0, column=0)
         Frame(self.frame4, bg=BACKGROUND, width=100).grid(row=0, column=1)
         Button(self.frame4, text='UNDO', font=('Helvetica', 20), command=self.undo, padx=20).grid(row=0, column=2)
+        #frame7
+        Label(self.frame7, text='Player 2', bg=BACKGROUND, font=('Helvetica', 20), pady=20).grid(row=0, column=0)
+        Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=0, column=1)
+        Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=0, column=2)
+        Button(self.frame7, text='\u270B', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=0, column=3)
+        Text(self.frame7, bg=BACKGROUND, font=('Helvetica', 20), width=25, height=10, pady=20).grid(row=1, column=0, columnspan=4)
+        Label(self.frame7, text='Player 1', bg=BACKGROUND, font=('Helvetica', 20), pady=20).grid(row=3, column=0)
+        Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=3, column=1)
+        Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=3, column=2)
+        Button(self.frame7, text='\u270B', font=('Helvetica', 20), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0).grid(row=3, column=3)
 
 if __name__ == "__main__":
-    Scacchiera().home.mainloop()
+    if len(sys.argv) > 1:
+        if str(sys.argv[1]) == '-d':
+            a = Scacchiera()
+            a.nuova_partita()
+            a.home.mainloop()
+        else:
+            print('ma che cazzo di parametri metti?')
+            exit()
+    else:
+        Scacchiera().home.mainloop()
