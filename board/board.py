@@ -151,6 +151,7 @@ class Scacchiera(Frame):
         self.running_timer = None
         self.stall_offer = None
         self.give_up_color = None
+        self.undo_request_color = None
         self.button = []
         self.score_board = None
         self.score_cells = []
@@ -158,39 +159,73 @@ class Scacchiera(Frame):
         self.make_home()
 
     def disable_buttons(self):
-        for but in self.button[:4]:
+        for but in self.button[:6]:
             but['state'] = 'disabled'
-        self.button[4].grid_forget()
+        self.button[6].grid_forget()
+
+    def cancel_undo_request(self):
+        self.button[6].grid_forget()
+        self.undo_request_color = None
+        for button in self.button:
+            button['state'] = 'normal'
 
     def cancel_stall_offer(self):
-        for but in self.button[:4]:
+        for but in self.button[:6]:
             but['state'] = 'normal'
         self.stall_offer = None
-        self.button[4].grid_forget()
+        self.button[6].grid_forget()
 
     def cancel_give_up(self):
-        for but in self.button[:4]:
+        for but in self.button[:6]:
             but['state'] = 'normal'
         self.give_up_color = None
-        self.button[4].grid_forget()
+        self.button[6].grid_forget()
+
+    def undo_request(self, color):
+        if self.undo_request_color == None:
+            self.undo_request_color = color
+            if not color:
+                self.button[6]['anchor'] = 'n'
+                self.button[6]['command'] = self.cancel_undo_request
+                self.button[6].grid(row=2, column=6)
+                self.button[5]['state'] = 'disabled'
+            else:
+                self.button[6]['anchor'] = 's'
+                self.button[6]['command'] = self.cancel_undo_request
+                self.button[6].grid(row=0, column=6, pady=(60,0))
+                self.button[4]['state'] = 'disabled'
+            self.button[1]['state'] = 'disabled'
+            self.button[3]['state'] = 'disabled'
+            self.button[0]['state'] = 'disabled'
+            self.button[2]['state'] = 'disabled'
+        else:
+            self.undo()
+            self.button[6].grid_forget()
+            self.undo_request_color = None
+            for button in self.button:
+                button['state'] = 'normal'
 
     def give_up(self, color):
         if self.give_up_color == None:
             self.give_up_color = color
             if not color:
-                self.button[4]['anchor'] = 'n'
-                self.button[4]['command'] = self.cancel_give_up
-                self.button[4].grid(row=2, column=5)
+                self.button[6]['anchor'] = 'n'
+                self.button[6]['command'] = self.cancel_give_up
+                self.button[6].grid(row=2, column=6)
                 self.button[0]['state'] = 'disabled'
                 self.button[1]['state'] = 'disabled'
                 self.button[2]['state'] = 'disabled'
+                self.button[4]['state'] = 'disabled'
+                self.button[5]['state'] = 'disabled'
             else:
-                self.button[4]['anchor'] = 's'
-                self.button[4]['command'] = self.cancel_give_up
-                self.button[4].grid(row=0, column=5)
+                self.button[6]['anchor'] = 's'
+                self.button[6]['command'] = self.cancel_give_up
+                self.button[6].grid(row=0, column=6, pady=(60,0))
                 self.button[0]['state'] = 'disabled'
                 self.button[2]['state'] = 'disabled'
                 self.button[3]['state'] = 'disabled'
+                self.button[4]['state'] = 'disabled'
+                self.button[5]['state'] = 'disabled'
         elif self.give_up_color == color:
             self.running_timer.run = False
             self.game.endgame()
@@ -202,15 +237,17 @@ class Scacchiera(Frame):
             self.stall_offer = color
             button['state'] = 'disabled'
             if not color:
-                self.button[4]['anchor'] = 'n'
-                self.button[4]['command'] = self.cancel_stall_offer
-                self.button[4].grid(row=2, column=5)
+                self.button[6]['anchor'] = 'n'
+                self.button[6]['command'] = self.cancel_stall_offer
+                self.button[6].grid(row=2, column=6)
             else:
-                self.button[4]['anchor'] = 's'
-                self.button[4]['command'] = self.cancel_stall_offer
-                self.button[4].grid(row=0, column=5)
+                self.button[6]['anchor'] = 's'
+                self.button[6]['command'] = self.cancel_stall_offer
+                self.button[6].grid(row=0, column=6, pady=(60,0))
             self.button[1]['state'] = 'disabled'
             self.button[3]['state'] = 'disabled'
+            self.button[4]['state'] = 'disabled'
+            self.button[5]['state'] = 'disabled'
         else:
             self.running_timer.run = False
             self.game.stall()
@@ -228,7 +265,7 @@ class Scacchiera(Frame):
             self.running_timer = self.white_timer
 
     def update_scores(self, score):
-        with open('score.txt', 'a') as f:
+        with open('scores.txt', 'a') as f:
             if score == 0:
                 f.write('\n1,0')
             elif score == 1:
@@ -248,7 +285,7 @@ class Scacchiera(Frame):
 
     def load_score(self):
         columns = defaultdict(list)
-        with open('score.txt') as f:
+        with open('scores.txt') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 for (k,v) in row.items(): 
@@ -347,7 +384,7 @@ class Scacchiera(Frame):
     def make_scacchiera(self):
         self.window = tk.Toplevel(self.home)
         self.window.protocol("WM_DELETE_WINDOW", self.staccah)
-        self.window.geometry('1170x760')
+        self.window.geometry('1170x720')
         self.window.title('Chess by Jefry and Layneeeee')
         self.window.configure(bg = BACKGROUND, padx=65, pady=30)
         #self.window.resizable(False, False)
@@ -471,29 +508,35 @@ class Scacchiera(Frame):
         b_timer.grid(row=0, column=1, pady=(60,0))
         Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=0, column=2, pady=(60,0))
         b1 = Button(self.frame7, text='1/2', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=1: self.stall(x, b1)), width=2, height=1, highlightthickness = 0)
-        b1.grid(row=0, column=3, pady=(60,0))
+        b1.grid(row=0, column=4, pady=(60,0))
         b2 = Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=1: self.give_up(x)), width=2, height=1, highlightthickness = 0)
-        b2.grid(row=0, column=4, pady=(60,0))
-        Text(self.frame7, bg=BACKGROUND, font=('Helvetica', 20), width=30, height=10, pady=20).grid(row=1, column=0, columnspan=5)
+        b2.grid(row=0, column=5, pady=(60,0))
+        Text(self.frame7, bg=BACKGROUND, font=('Helvetica', 20), width=30, height=10, pady=20).grid(row=1, column=0, columnspan=6)
         Label(self.frame7, text='Player 1', bg=BACKGROUND, font=('Helvetica', 20), width=10, anchor='w').grid(row=2, column=0)
         w_timer = Label(self.frame7, text='', font=('Helvetica', 20), bg=BACKGROUND)
         self.white_timer = Timer(20, 0, 0, w_timer, self)
         w_timer.grid(row=2, column=1)
         Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=2, column=2)
         b3 = Button(self.frame7, text='1/2', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=0: self.stall(x, b3)), width=2, height=1, highlightthickness = 0)
-        b3.grid(row=2, column=3)
+        b3.grid(row=2, column=4)
         b4 = Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=0: self.give_up(x)), width=2, height=1, highlightthickness = 0)
-        b4.grid(row=2, column=4)
-        b5 = Button(self.frame7, text='x', fg='red', font=('Helvetica', 18), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0)
+        b4.grid(row=2, column=5)
+        b5 = Button(self.frame7, text='<-', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=1: self.undo_request(x)), width=2, height=1, highlightthickness = 0)
+        b5.grid(row=0, column=3, pady=(60,0))
+        b6 = Button(self.frame7, text='<-', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=0: self.undo_request(x)), width=2, height=1, highlightthickness = 0)
+        b6.grid(row=2, column=3)
+        b7 = Button(self.frame7, text='x', fg='red', font=('Helvetica', 18), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0)
         self.button.append(b1)
         self.button.append(b2)
         self.button.append(b3)
         self.button.append(b4)
         self.button.append(b5)
+        self.button.append(b6)
+        self.button.append(b7)
         self.running_timer = self.white_timer
         self.white_timer.run = True
         self.score_board = Frame(self.frame7, bg=BACKGROUND, pady=50)
-        self.score_board.grid(row=3, column=0, columnspan=5)
+        self.score_board.grid(row=3, column=0, columnspan=6)
         ll = Label(self.score_board, text="Player 1", bg=BACKGROUND, anchor='center', borderwidth=1, relief='raised')
         ll.grid(row=0, column=0)
         self.score_cells.append(ll)
