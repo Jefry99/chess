@@ -75,9 +75,11 @@ class Game:
                                 self.check = check_check(target.get_color(), self.gameboard, self)
                                 if self.check:
                                     if not self.color_check:
-                                        check_mate(self.pos_b_k, self, self.check)
+                                        if check_mate(self.pos_b_k, self, self.check):
+                                            return 4
                                     else:
-                                        check_mate(self.pos_w_K, self, self.check)
+                                        if check_mate(self.pos_w_K, self, self.check):
+                                            return 5
                                 else:
                                     chech_stall(self.player_turn, self)
                                     chech_stall_insufficient_material(self)
@@ -106,9 +108,11 @@ class Game:
                                 self.check = check_check(target.get_color(), self.gameboard, self)
                                 if self.check:
                                     if not self.color_check:
-                                        check_mate(self.pos_b_k, self, self.check)
+                                        if check_mate(self.pos_b_k, self, self.check):
+                                            return 4
                                     else:
-                                        check_mate(self.pos_w_K, self, self.check)
+                                        if check_mate(self.pos_w_K, self, self.check):
+                                            return 5
                                 else:
                                     chech_stall(self.player_turn, self)
                                     chech_stall_insufficient_material(self)
@@ -138,9 +142,11 @@ class Game:
                                 self.check = check_check(target.get_color(), self.gameboard, self)
                                 if self.check:
                                     if not self.color_check:
-                                        check_mate(self.pos_b_k, self, self.check)
+                                        if check_mate(self.pos_b_k, self, self.check):
+                                            return 4
                                     else:
-                                        check_mate(self.pos_w_K, self, self.check)
+                                        if check_mate(self.pos_w_K, self, self.check):
+                                            return 5
                                 else:
                                     chech_stall(self.player_turn, self)
                                     chech_stall_insufficient_material(self)
@@ -169,12 +175,14 @@ class Game:
                                 self.check = check_check(target.get_color(), self.gameboard, self)
                                 if self.check:
                                     if not self.color_check:
-                                        check_mate(self.pos_b_k, self, self.check)
+                                        if check_mate(self.pos_b_k, self, self.check):
+                                            return 4
                                     else:
-                                        check_mate(self.pos_w_K, self, self.check)
+                                        if check_mate(self.pos_w_K, self, self.check):
+                                            return 5
                                 else:
-                                    chech_stall(self.player_turn, self)
-                                    chech_stall_insufficient_material(self)
+                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self):
+                                        return 6
                                 if self.player_turn:
                                     self.player_turn = 0
                                 else:
@@ -236,9 +244,11 @@ class Game:
                         self.check = check_check(target.get_color(), self.gameboard, self)
                         if self.check:
                             if not self.color_check:
-                                check_mate(self.pos_b_k, self, self.check)
+                                if check_mate(self.pos_b_k, self, self.check):
+                                    return 4
                             else:
-                                check_mate(self.pos_w_K, self, self.check)
+                                if check_mate(self.pos_w_K, self, self.check):
+                                    return 5
                         else:
                             chech_stall(self.player_turn, self)
                             chech_stall_insufficient_material(self)
@@ -284,9 +294,11 @@ class Game:
         check = check_check(self.player_turn, self.gameboard, self)
         if check:
             if not self.color_check:
-                check_mate(self.pos_b_k, self, check)
+                if check_mate(self.pos_b_k, self, self.check):
+                    return 4
             else:
-                check_mate(self.pos_w_K, self, check)
+                if check_mate(self.pos_w_K, self, self.check):
+                    return 5
         else:
             chech_stall(self.player_turn, self)
             chech_stall_insufficient_material(self)
@@ -427,6 +439,8 @@ def check_mate(pos, game, check):
     if not game.color_check:
         for piece in pedine_nere:
             piece[1].find_valid_moves(piece[0], game.gameboard)
+            if len(piece[1].avaiable_moves) == 0:
+                continue
             for mossa in piece[1].avaiable_moves:
                 del mod_gameboard
                 mod_gameboard = copy.deepcopy(game.gameboard)
@@ -445,24 +459,27 @@ def check_mate(pos, game, check):
     else:
         for piece in pedine_bianche:
             piece[1].find_valid_moves(piece[0], game.gameboard)
+            if len(piece[1].avaiable_moves) == 0:
+                continue
             for mossa in piece[1].avaiable_moves:
                 del mod_gameboard
                 mod_gameboard = copy.deepcopy(game.gameboard)
                 del mod_gameboard[piece[0]]
-                mod_gameboard[mossa] = piece[1]
+                mod_gameboard[mossa] = copy.deepcopy(piece[1])
                 mod_gameboard[piece[0]] = None
                 check1 = False
                 if check_check(game.color_check, mod_gameboard, game):
                     check1 = True
                 if check1:
                     break
-            if not check1:
+            if check1:
                 mate.append(1)
             else:
                 mate.append(0)
     if 0 not in mate:
         print('CHECKMATE')
         game.endgame()
+        return True
 
 def check_check(color, gameboard, game):
     game.pedine_bianche.clear()
@@ -508,9 +525,9 @@ def chech_stall(color, game):
                 return
     print('STALL')
     game.stall()
+    return True
 
 def chech_stall_insufficient_material(game):
-    print(len(game.pedine_bianche))
     if len(game.pedine_bianche) == 2:
         if len(game.pedine_nere) == 2:
             for pezzo_b in game.pedine_bianche:
@@ -519,18 +536,22 @@ def chech_stall_insufficient_material(game):
                         if pezzo_n[1].get_type() in 'nb':
                             print('STALL')
                             game.stall
+                            return True
     elif len(game.pedine_bianche) == 1:
         if len(game.pedine_nere) == 2:
             for pezzo_n in game.pedine_nere:
                 if pezzo_n[1].get_type() in 'nb':
                     print('STALL')
                     game.stall()
+                    return True
     elif len(game.pedine_nere) == 1:
         if len(game.pedine_bianche) == 2:
             for pezzo_b in game.pedine_bianche:
                 if pezzo_b[1].get_type() in 'NB':
                     print('STALL')
                     game.stall()
+                    return True
+    return False
 
 def check_kingside_cast(color, gameboard, game):
     if not color:

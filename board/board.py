@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter import *
 from game import Game
+from collections import defaultdict
 import sys
 import time
+import csv
 
 matrice1 = [['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'], ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'], ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']]
 pezzi = {'R':'WhiteRook', 'N':'WhiteKnight', 'B':'WhiteBishop', 'Q':'WhiteQueen', 'K':'WhiteKing', 'P':'WhitePawn', 'r':'BlackRook', 'n':'BlackKnight', 'b':'BlackBishop', 'q':'BlackQueen', 'k':'BlackKing', 'p':'BlackPawn'}
@@ -35,6 +37,7 @@ class Timer(object):
     def lose(self):
         self.scacchiera.running_timer.run = False
         self.scacchiera.game.endgame()
+        self.scacchiera.update_scores(not self.color)
 
     def reset(self):
         self.min = 20
@@ -100,13 +103,24 @@ class CreateCanvasObject(object):
                 self.scacchiera.pezzi.append(a)
                 self.scacchiera.running_timer.start()
                 self.rimuovi()
+            elif str(var) in '456':
+                self.scacchiera.running_timer.run = False
+                self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
+                self.rimuovi()
+                self.scacchiera.disable_buttons()
+                if var == 4:
+                    print('Vince il bianco')
+                    self.scacchiera.update_scores(0)
+                elif var == 5:
+                    print('Vince il nero')
+                    self.scacchiera.update_scores(1)
+                else:
+                    print('Patta')
+                    self.scacchiera.update_scores(3)
             else:
                 a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera)
                 self.scacchiera.pezzi.append(a)
                 self.rimuovi()
-            if not self.scacchiera.game.is_game_alive:
-                self.scacchiera.running_timer.run = False
-                self.scacchiera.disable_buttons()
             #self.canvas.itemconfig(self.canvas.find_withtag('ciao0', fill='blue')
             #print(self.canvas.find_withtag('ciao{}'.format(quadro)))
             #print(self.canvas.coords(self.canvas.find_withtag('ciao1')))
@@ -138,6 +152,9 @@ class Scacchiera(Frame):
         self.stall_offer = None
         self.give_up_color = None
         self.button = []
+        self.score_board = None
+        self.score_cells = []
+        self.n_partite = None
         self.make_home()
 
     def disable_buttons(self):
@@ -178,6 +195,7 @@ class Scacchiera(Frame):
             self.running_timer.run = False
             self.game.endgame()
             self.disable_buttons()
+            self.update_scores(not color)
 
     def stall(self, color, button):
         if self.stall_offer == None:
@@ -197,6 +215,7 @@ class Scacchiera(Frame):
             self.running_timer.run = False
             self.game.stall()
             self.disable_buttons()
+            self.update_scores(3)
 
     def flip_timer(self):
         if self.white_timer.run:
@@ -207,6 +226,49 @@ class Scacchiera(Frame):
             self.black_timer.run = False
             self.white_timer.run = True
             self.running_timer = self.white_timer
+
+    def update_scores(self, score):
+        with open('score.txt', 'a') as f:
+            if score == 0:
+                f.write('\n1,0')
+            elif score == 1:
+                f.write('\n0,1')
+            else:
+                f.write('\n1/2,1/2')
+        self.load_score()
+    
+    def somma(self, lista):
+        ris = 0
+        for elem in lista:
+            if elem == '1/2':
+                ris += 0.5
+            else:
+                ris += int(elem)
+        return ris
+
+    def load_score(self):
+        columns = defaultdict(list)
+        with open('score.txt') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                for (k,v) in row.items(): 
+                    columns[k].append(v)
+        if len(columns['Player 1']) > 12:
+            columns['Player 1'] = columns['Player 1'][len(columns['Player 1'])-12:]
+            columns['Player 2'] = columns['Player 2'][len(columns['Player 2'])-12:]
+        else:
+            while len(columns['Player 1']) != 12:
+                columns['Player 1'].append(0)
+                columns['Player 2'].append(0)
+        i, k, j = 2, 14, 0
+        while i < 14:
+            self.score_cells[i]['text'] = columns['Player 1'][j]
+            i += 1
+            self.score_cells[k]['text'] = columns['Player 2'][j]
+            k += 1
+            j += 1
+        self.score_cells[26]['text'] = self.somma(columns['Player 1'])
+        self.score_cells[27]['text'] = self.somma(columns['Player 2'])
 
     def after_selection(self, promotion):
         self.promozione = promotion
@@ -342,7 +404,7 @@ class Scacchiera(Frame):
         self.frame2.grid(row=0, column=1)
         self.frame3.grid(row=1, column=0)
         self.frame4.grid(row=2, column=0)
-        self.frame7.grid(row=0, column=2)
+        self.frame7.grid(row=0, column=2, rowspan=2)
         cont = 0
         num = 0
         for n in range(1, 9):
@@ -403,15 +465,15 @@ class Scacchiera(Frame):
         Frame(self.frame4, bg=BACKGROUND, width=100).grid(row=0, column=1)
         Button(self.frame4, text='UNDO', font=('Helvetica', 20), command=self.undo, padx=20).grid(row=0, column=2)
         #frame7
-        Label(self.frame7, text='Player 2', bg=BACKGROUND, font=('Helvetica', 20), width=10, anchor='w').grid(row=0, column=0)
+        Label(self.frame7, text='Player 2', bg=BACKGROUND, font=('Helvetica', 20), width=10, anchor='w').grid(row=0, column=0, pady=(60,0))
         b_timer = Label(self.frame7, text='', font=('Helvetica', 20), bg=BACKGROUND)
         self.black_timer = Timer(20, 0, 1, b_timer, self)
-        b_timer.grid(row=0, column=1)
-        Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=0, column=2)
+        b_timer.grid(row=0, column=1, pady=(60,0))
+        Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=0, column=2, pady=(60,0))
         b1 = Button(self.frame7, text='1/2', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=1: self.stall(x, b1)), width=2, height=1, highlightthickness = 0)
-        b1.grid(row=0, column=3)
+        b1.grid(row=0, column=3, pady=(60,0))
         b2 = Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=1: self.give_up(x)), width=2, height=1, highlightthickness = 0)
-        b2.grid(row=0, column=4)
+        b2.grid(row=0, column=4, pady=(60,0))
         Text(self.frame7, bg=BACKGROUND, font=('Helvetica', 20), width=30, height=10, pady=20).grid(row=1, column=0, columnspan=5)
         Label(self.frame7, text='Player 1', bg=BACKGROUND, font=('Helvetica', 20), width=10, anchor='w').grid(row=2, column=0)
         w_timer = Label(self.frame7, text='', font=('Helvetica', 20), bg=BACKGROUND)
@@ -430,6 +492,26 @@ class Scacchiera(Frame):
         self.button.append(b5)
         self.running_timer = self.white_timer
         self.white_timer.run = True
+        self.score_board = Frame(self.frame7, bg=BACKGROUND, pady=50)
+        self.score_board.grid(row=3, column=0, columnspan=5)
+        ll = Label(self.score_board, text="Player 1", bg=BACKGROUND, anchor='center', borderwidth=1, relief='raised')
+        ll.grid(row=0, column=0)
+        self.score_cells.append(ll)
+        ll = Label(self.score_board, text="Player 2", bg=BACKGROUND, anchor='center', borderwidth=1, relief='raised')
+        ll.grid(row=1, column=0)
+        self.score_cells.append(ll)
+        for i in range(2):
+            for j in range(12):
+                ll = Label(self.score_board, text="0", width=2, bg=BACKGROUND, anchor='center', borderwidth=1, relief='raised')
+                ll.grid(row=i, column=j+1)
+                self.score_cells.append(ll)
+        ll = Label(self.score_board, text="", bg=BACKGROUND, width=3, anchor='center', borderwidth=1, relief='raised')
+        ll.grid(row=0, column=13)
+        self.score_cells.append(ll)
+        ll = Label(self.score_board, text="", bg=BACKGROUND, width=3, anchor='center', borderwidth=1, relief='raised')
+        ll.grid(row=1, column=13)
+        self.score_cells.append(ll)
+        self.load_score()
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
