@@ -1,5 +1,5 @@
 .DS_Store
 board/__pycache__/
 chess.code-workspace
-*.txt
+board/scores.txt
 .vscode
