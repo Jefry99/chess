@@ -143,27 +143,24 @@ class CreateCanvasObject(object):
                 self.rimuovi()
             elif str(var) in '456':
                 self.scacchiera.running_timer.run = False
-                if self.scacchiera.game.check:
-                    if not self.scacchiera.game.color_check:
-                        self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_b_k[0]), 35+70*(7-self.scacchiera.game.pos_b_k[1]), self)
-                    else:
-                        self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_w_K[0]), 35+70*(7-self.scacchiera.game.pos_w_K[1]), self)
+                try:
+                    self.scacchiera.check_tracker.rimuovi()
+                except:
+                    pass
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
                 self.scacchiera.disable_buttons()
                 if var == 4:
                     print('Vince il bianco')
                     self.scacchiera.update_scores(0)
+                    self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_b_k[0]), 35+70*(7-self.scacchiera.game.pos_b_k[1]), self)
                 elif var == 5:
                     print('Vince il nero')
+                    self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_w_K[0]), 35+70*(7-self.scacchiera.game.pos_w_K[1]), self)
                     self.scacchiera.update_scores(1)
                 else:
                     print('Patta')
                     self.scacchiera.update_scores(3)
                 self.scacchiera.delete_trackers()
-                try:
-                    self.scacchiera.check_tracker.rimuovi()
-                except:
-                    pass
                 self.scacchiera.num_mosse += 1
                 self.rimuovi()
             else:
@@ -456,9 +453,9 @@ class Scacchiera(Frame):
     def make_scacchiera(self):
         self.window = tk.Toplevel(self.home)
         self.window.protocol("WM_DELETE_WINDOW", self.staccah)
-        self.window.geometry('1170x720')
+        self.window.geometry("{0}x{1}+0+0".format(self.window.winfo_screenwidth(), self.window.winfo_screenheight()))
         self.window.title('Chess by Jefry and Layneeeee')
-        self.window.configure(bg = BACKGROUND, padx=65, pady=30)
+        self.window.configure(bg = BACKGROUND, padx=self.window.winfo_screenwidth()/10, pady=self.window.winfo_screenheight()/10)
         #self.window.resizable(False, False)
         self.frame2 = Frame(self.window, bg=BACKGROUND, padx=10, height = self.tileSize*8, width = 50)
         self.frame3 = Frame(self.window, bg = BACKGROUND, pady = 10, width = self.tileSize*8, height = 50)

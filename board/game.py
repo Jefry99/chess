@@ -364,7 +364,7 @@ class Game:
     def return_target_moves(self, x, y):
         da_ritornare = []
         pezzo = self.gameboard[(x,y)]
-        if pezzo.color == self.player_turn:
+        if pezzo.color == self.player_turn and self.is_game_alive:
             if not self.check:
                 pezzo.find_valid_moves((x,y), self.gameboard)
                 for mossa in pezzo.avaiable_moves:
