@@ -204,6 +204,7 @@ class Scacchiera(Frame):
         self.n_partite = None
         self.trackers = []
         self.check_tracker = None
+        self.developer_mode = False
         self.num_mosse = 0
         self.make_home()
 
@@ -455,7 +456,7 @@ class Scacchiera(Frame):
         self.window.protocol("WM_DELETE_WINDOW", self.staccah)
         self.window.geometry("{0}x{1}+0+0".format(self.window.winfo_screenwidth(), self.window.winfo_screenheight()))
         self.window.title('Chess by Jefry and Layneeeee')
-        self.window.configure(bg = BACKGROUND, padx=self.window.winfo_screenwidth()/10, pady=self.window.winfo_screenheight()/10)
+        self.window.configure(bg = BACKGROUND, padx=(self.window.winfo_screenwidth()-1050)/2, pady=(self.window.winfo_screenheight()-700)/2)
         #self.window.resizable(False, False)
         self.frame2 = Frame(self.window, bg=BACKGROUND, padx=10, height = self.tileSize*8, width = 50)
         self.frame3 = Frame(self.window, bg = BACKGROUND, pady = 10, width = self.tileSize*8, height = 50)
@@ -515,7 +516,8 @@ class Scacchiera(Frame):
     def make(self):
         self.frame2.grid(row=0, column=1)
         self.frame3.grid(row=1, column=0)
-        self.frame4.grid(row=2, column=0)
+        if self.developer_mode:
+            self.frame4.grid(row=2, column=0)
         self.frame7.grid(row=0, column=2, rowspan=2)
         cont = 0
         num = 0
@@ -573,9 +575,10 @@ class Scacchiera(Frame):
         h6.pack(fill = BOTH, expand = True)
         h7.pack(fill = BOTH, expand = True)
         h8.pack(fill = BOTH, expand = True)
-        Button(self.frame4, text='RESET', font=('Helvetica', 20), command=self.reset_all, padx=20).grid(row=0, column=0)
-        Frame(self.frame4, bg=BACKGROUND, width=100).grid(row=0, column=1)
-        Button(self.frame4, text='UNDO', font=('Helvetica', 20), command=self.undo, padx=20).grid(row=0, column=2)
+        if self.developer_mode:
+            Button(self.frame4, text='RESET', font=('Helvetica', 20), command=self.reset_all, padx=20).grid(row=0, column=0)
+            Frame(self.frame4, bg=BACKGROUND, width=100).grid(row=0, column=1)
+            Button(self.frame4, text='UNDO', font=('Helvetica', 20), command=self.undo, padx=20).grid(row=0, column=2)
         #frame7
         Label(self.frame7, text='Player 2', bg=BACKGROUND, font=('Helvetica', 20), width=10, anchor='w').grid(row=0, column=0, pady=(60,0))
         b_timer = Label(self.frame7, text='', font=('Helvetica', 20), bg=BACKGROUND)
@@ -634,6 +637,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         if str(sys.argv[1]) == '-d':
             a = Scacchiera()
+            a.developer_mode = True
             a.nuova_partita()
             a.home.mainloop()
         else:

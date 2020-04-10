@@ -366,6 +366,17 @@ class Game:
         pezzo = self.gameboard[(x,y)]
         if pezzo.color == self.player_turn and self.is_game_alive:
             if not self.check:
+                if pezzo.get_type() in 'Kk':
+                    if pezzo.get_type() == 'K':
+                        if check_kingside_cast(pezzo.get_color(), copy.deepcopy(self.gameboard), self) and self.w_kingside_cast:
+                            da_ritornare.append(((6,0), 0))
+                        if check_queenside_cast(pezzo.get_color(), copy.deepcopy(self.gameboard), self) and self.w_queenside_cast:
+                            da_ritornare.append(((2,0), 0))
+                    else:
+                        if check_kingside_cast(pezzo.get_color(), copy.deepcopy(self.gameboard), self) and self.b_kingside_cast:
+                            da_ritornare.append(((6,7), 0))
+                        if check_queenside_cast(pezzo.get_color(), copy.deepcopy(self.gameboard), self) and self.b_queenside_cast:
+                            da_ritornare.append(((2,7), 0))
                 pezzo.find_valid_moves((x,y), self.gameboard)
                 for mossa in pezzo.avaiable_moves:
                     if self.gameboard[mossa] == None:
@@ -606,7 +617,7 @@ def check_kingside_cast(color, gameboard, game):
 
 def check_queenside_cast(color, gameboard, game):
     if not color:
-        if gameboard[(3,0)] == None and gameboard[(2,0)] == None:
+        if gameboard[(3,0)] == None and gameboard[(2,0)] == None and gameboard[(1,0)] == None:
             gameboard[(4,0)] = None
             gameboard[(3,0)] = King(0)
             if not check_check(not color, gameboard, game):
@@ -621,7 +632,7 @@ def check_queenside_cast(color, gameboard, game):
         else:
             return 0
     else:
-        if gameboard[(3,7)] == None and gameboard[(2,7)] == None:
+        if gameboard[(3,7)] == None and gameboard[(2,7)] == None and gameboard[(1,7)] == None:
             gameboard[(4,7)] = None
             gameboard[(3,7)] = King(1)
             if not check_check(not color, gameboard, game):
