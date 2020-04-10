@@ -37,6 +37,7 @@ class Game:
         self.is_game_alive = False
 
     def undo(self):
+        self.en_passant.clear()
         if self.num_move != 0:
             self.num_move -= 1
             self.gameboard = copy.deepcopy(self.history[self.num_move])
@@ -218,7 +219,7 @@ class Game:
                                 else:
                                     del mod_gameboard[(to[0], to[1]+1)]
                                     self.gameboard[(to[0], to[1]+1)] = None
-                            if self.gameboard[self.en_passant[0]].get_type() == 'E' or self.gameboard[self.en_passant[0]].get_type() == 'e':
+                            if ((self.gameboard[self.en_passant[0]].get_type() == 'E') or (self.gameboard[self.en_passant[0]].get_type() == 'e')):
                                 del self.gameboard[self.en_passant[0]]
                                 self.gameboard[self.en_passant[0]] = None
                             self.en_passant.clear()
