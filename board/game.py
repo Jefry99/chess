@@ -84,8 +84,8 @@ class Game:
                                         if check_mate(self.pos_w_K, self, self.check):
                                             return 5
                                 else:
-                                    chech_stall(self.player_turn, self)
-                                    chech_stall_insufficient_material(self)
+                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self):
+                                        return 6
                                 if self.player_turn:
                                     self.player_turn = 0
                                 else:
@@ -117,8 +117,8 @@ class Game:
                                         if check_mate(self.pos_w_K, self, self.check):
                                             return 5
                                 else:
-                                    chech_stall(self.player_turn, self)
-                                    chech_stall_insufficient_material(self)
+                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self):
+                                        return 6
                                 if self.player_turn:
                                     self.player_turn = 0
                                 else:
@@ -151,8 +151,8 @@ class Game:
                                         if check_mate(self.pos_w_K, self, self.check):
                                             return 5
                                 else:
-                                    chech_stall(self.player_turn, self)
-                                    chech_stall_insufficient_material(self)
+                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self):
+                                        return 6
                                 if self.player_turn:
                                     self.player_turn = 0
                                 else:
@@ -253,8 +253,8 @@ class Game:
                                 if check_mate(self.pos_w_K, self, self.check):
                                     return 5
                         else:
-                            chech_stall(self.player_turn, self)
-                            chech_stall_insufficient_material(self)
+                            if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self):
+                                return 6
                         if self.player_turn:
                             self.player_turn = 0
                         else:
@@ -303,8 +303,8 @@ class Game:
                 if check_mate(self.pos_w_K, self, self.check):
                     return 5
         else:
-            chech_stall(self.player_turn, self)
-            chech_stall_insufficient_material(self)
+            if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self):
+                return 6
         if self.player_turn:
             self.player_turn = 0
         else:
@@ -561,6 +561,7 @@ def chech_stall(color, game):
     return True
 
 def chech_stall_insufficient_material(game):
+    print(len(game.pedine_nere))
     if len(game.pedine_bianche) == 2:
         if len(game.pedine_nere) == 2:
             for pezzo_b in game.pedine_bianche:
@@ -570,6 +571,10 @@ def chech_stall_insufficient_material(game):
                             print('STALL')
                             game.stall
                             return True
+    elif len(game.pedine_bianche) == 1 and len(game.pedine_nere) == 1:
+        print('STALL')
+        game.stall()
+        return True
     elif len(game.pedine_bianche) == 1:
         if len(game.pedine_nere) == 2:
             for pezzo_n in game.pedine_nere:
