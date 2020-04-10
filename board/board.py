@@ -285,11 +285,18 @@ class Scacchiera(Frame):
 
     def load_score(self):
         columns = defaultdict(list)
-        with open('scores.txt') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                for (k,v) in row.items(): 
-                    columns[k].append(v)
+        try:
+            with open('scores.txt') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    for (k,v) in row.items(): 
+                        columns[k].append(v)
+        except:
+            f = open('scores.txt', 'w+')
+            f.write('Player 1,Player 2')
+            f.close()
+            self.load_score()
+            return
         if len(columns['Player 1']) > 12:
             columns['Player 1'] = columns['Player 1'][len(columns['Player 1'])-12:]
             columns['Player 2'] = columns['Player 2'][len(columns['Player 2'])-12:]
