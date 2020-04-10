@@ -27,6 +27,8 @@ class Game:
         self.w_kingside_cast = True
         self.w_queenside_cast = True
         self.history = []
+        self.last_b_move = []
+        self.last_w_move = []
         self.history.append(copy.deepcopy(self.gameboard))
         self.num_move = 0
 
