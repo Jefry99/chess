@@ -199,6 +199,7 @@ class Scacchiera(Frame):
         self.give_up_color = None
         self.undo_request_color = None
         self.button = []
+        self.rematch_button = None
         self.score_board = None
         self.score_cells = []
         self.n_partite = None
@@ -207,6 +208,9 @@ class Scacchiera(Frame):
         self.developer_mode = False
         self.num_mosse = 0
         self.make_home()
+
+    def rematch(self):
+        self.rematch_button.grid(row=3, column=0, columnspan=6, pady=(30,0))
 
     def delete_trackers(self):
         for trackers in self.trackers:
@@ -294,6 +298,7 @@ class Scacchiera(Frame):
             self.game.endgame()
             self.disable_buttons()
             self.update_scores(not color)
+            self.rematch()
 
     def stall(self, color, button):
         if self.stall_offer == None:
@@ -316,6 +321,7 @@ class Scacchiera(Frame):
             self.game.stall()
             self.disable_buttons()
             self.update_scores(3)
+            self.rematch()
 
     def flip_timer(self):
         if self.white_timer.run:
@@ -488,6 +494,10 @@ class Scacchiera(Frame):
             self.check_tracker.rimuovi()
         except:
             pass
+        try:
+            self.rematch_button.grid_forget()
+        except:
+            pass
         print('Resetted')
 
     def undo(self):
@@ -604,6 +614,7 @@ class Scacchiera(Frame):
         b6 = Button(self.frame7, text='<-', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=0: self.undo_request(x)), width=2, height=1, highlightthickness = 0)
         b6.grid(row=2, column=3)
         b7 = Button(self.frame7, text='x', fg='red', font=('Helvetica', 18), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0)
+        self.rematch_button = Button(self.frame7, text='REMATCH', font=('Helvetica', 20), bg=BACKGROUND, command=self.reset_all, width=9, height=1, highlightthickness = 0)
         self.button.append(b1)
         self.button.append(b2)
         self.button.append(b3)
@@ -613,7 +624,7 @@ class Scacchiera(Frame):
         self.button.append(b7)
         self.running_timer = self.white_timer
         self.score_board = Frame(self.frame7, bg=BACKGROUND, pady=50)
-        self.score_board.grid(row=3, column=0, columnspan=6)
+        self.score_board.grid(row=4, column=0, columnspan=6)
         ll = Label(self.score_board, text="Player 1", bg=BACKGROUND, anchor='center', borderwidth=1, relief='raised')
         ll.grid(row=0, column=0)
         self.score_cells.append(ll)
