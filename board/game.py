@@ -361,6 +361,17 @@ class Game:
         print(' A  B  C  D  E  F  G  H')
         print('\n')
 
+    def return_target_moves(self, x, y):
+        da_ritornare = []
+        pezzo = self.gameboard[(x,y)]
+        if pezzo.color == self.player_turn:
+            pezzo.find_valid_moves((x,y), self.gameboard)
+            for mossa in pezzo.avaiable_moves:
+                if self.gameboard[mossa] == None:
+                    da_ritornare.append((mossa, 0))
+                else:
+                    da_ritornare.append((mossa, 1))
+        return da_ritornare
 
 def double_input() -> ((int, int), (int, int)):
     print('prima la casella corrente poi destinazione, es: a2 a4')

@@ -44,6 +44,18 @@ class Timer(object):
         self.sec = 0
         self.label['text'] = str(self.min) + ':' + '{0:0=2d}'.format(int(self.sec))
 
+class DisplayMove(object):
+    def __init__(self, canvas, image_name, xpos, ypos, scacchiera):
+        self.canvas = canvas
+        self.scacchiera = scacchiera
+        self.image_name = image_name
+        self.tk_image = tk.PhotoImage(file="{}".format(image_name))
+        self.image_obj= self.canvas.create_image(xpos, ypos, image=self.tk_image)
+
+    def rimuovi(self):
+        self.canvas.delete(self.image_obj)
+        del self
+
 class CreateCanvasObject(object):
     def __init__(self, canvas, image_name, xpos, ypos, scacchiera):
         self.canvas = canvas
@@ -65,9 +77,11 @@ class CreateCanvasObject(object):
         del self
 
     def start(self, event):
+        self.scacchiera.deleat_trackers()
         self.pos = (int(event.x/70), 7-int(event.y/70))
         self.start_x = int(event.x/70)
         self.start_y = int(event.y/70)
+        self.scacchiera.put_trackers(self.start_x, 7-self.start_y)
 
     def move(self, event):
         if not self.move_flag:
@@ -89,6 +103,11 @@ class CreateCanvasObject(object):
                 self.scacchiera.flip_timer()
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
                 self.scacchiera.running_timer.start()
+                self.scacchiera.deleat_trackers()
+                try:
+                    self.scacchiera.check_tracker.rimuovi()
+                except:
+                    pass
                 self.rimuovi()
                 #CreateCanvasObject(self.canvas, self.image_name, 35+70*(quadro[0]), 35+70*(quadro[1]), self.scacchiera)
                 #self.canvas.delete(self.image_obj)
@@ -102,11 +121,15 @@ class CreateCanvasObject(object):
                 a = CreateCanvasObject(self.canvas, 'png/{}.png'.format(pezzi[self.scacchiera.promozione]), 35+70*self.to[0], 35+70*(7-self.to[1]), self.scacchiera)
                 self.scacchiera.pezzi.append(a)
                 self.scacchiera.running_timer.start()
+                self.scacchiera.deleat_trackers()
+                try:
+                    self.scacchiera.check_tracker.rimuovi()
+                except:
+                    pass
                 self.rimuovi()
             elif str(var) in '456':
                 self.scacchiera.running_timer.run = False
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
-                self.rimuovi()
                 self.scacchiera.disable_buttons()
                 if var == 4:
                     print('Vince il bianco')
@@ -117,10 +140,21 @@ class CreateCanvasObject(object):
                 else:
                     print('Patta')
                     self.scacchiera.update_scores(3)
+                self.scacchiera.deleat_trackers()
+                try:
+                    self.scacchiera.check_tracker.rimuovi()
+                except:
+                    pass
+                self.rimuovi()
             else:
                 a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera)
                 self.scacchiera.pezzi.append(a)
                 self.rimuovi()
+            if self.scacchiera.game.check:
+                if self.scacchiera.game.color_check:
+                    self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_b_k[0]), 35+70*(self.scacchiera.game.pos_b_k[1]), self)
+                else:
+                    self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_w_K[0]), 35+70*(self.scacchiera.game.pos_w_K[1]), self)
             #self.canvas.itemconfig(self.canvas.find_withtag('ciao0', fill='blue')
             #print(self.canvas.find_withtag('ciao{}'.format(quadro)))
             #print(self.canvas.coords(self.canvas.find_withtag('ciao1')))
@@ -156,7 +190,22 @@ class Scacchiera(Frame):
         self.score_board = None
         self.score_cells = []
         self.n_partite = None
+        self.trackers = []
+        self.check_tracker = None
         self.make_home()
+
+    def deleat_trackers(self):
+        for trackers in self.trackers:
+            trackers.rimuovi()
+
+    def put_trackers(self, x, y):
+        moves = self.game.return_target_moves(x,y)
+        for move in moves:
+            if move[1]:
+                a = DisplayMove(self.canvas, 'png/Capture.png', 35+70*(move[0][0]), 35+70*(7-move[0][1]), self)
+            else:
+                a = DisplayMove(self.canvas, 'png/AvaiableMove.png', 35+70*(move[0][0]), 35+70*(7-move[0][1]), self)
+            self.trackers.append(a)
 
     def disable_buttons(self):
         for but in self.button[:6]:
@@ -419,6 +468,7 @@ class Scacchiera(Frame):
         self.white_timer.reset()
         self.black_timer.reset()
         self.black_timer.run = True
+        self.deleat_trackers()
         print('Resetted')
 
     def undo(self):
