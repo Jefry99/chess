@@ -291,8 +291,8 @@ class Game:
         elif tipo == 'b':
             self.gameboard[self.pos_of_promotion] = Bishop(1)
 
-        check = check_check(self.player_turn, self.gameboard, self)
-        if check:
+        self.check = check_check(self.player_turn, self.gameboard, self)
+        if self.check:
             if not self.color_check:
                 if check_mate(self.pos_b_k, self, self.check):
                     return 4
@@ -365,12 +365,24 @@ class Game:
         da_ritornare = []
         pezzo = self.gameboard[(x,y)]
         if pezzo.color == self.player_turn:
-            pezzo.find_valid_moves((x,y), self.gameboard)
-            for mossa in pezzo.avaiable_moves:
-                if self.gameboard[mossa] == None:
-                    da_ritornare.append((mossa, 0))
-                else:
-                    da_ritornare.append((mossa, 1))
+            if not self.check:
+                pezzo.find_valid_moves((x,y), self.gameboard)
+                for mossa in pezzo.avaiable_moves:
+                    if self.gameboard[mossa] == None:
+                        da_ritornare.append((mossa, 0))
+                    else:
+                        da_ritornare.append((mossa, 1))
+            else:
+                for mossa in pezzo.avaiable_moves:
+                    mod_gameboard = copy.deepcopy(self.gameboard)
+                    del mod_gameboard[(x,y)]
+                    mod_gameboard[(x,y)] = None
+                    mod_gameboard[mossa] = pezzo
+                    if not check_check((not pezzo.get_color()), mod_gameboard, self):
+                        if self.gameboard[mossa] == None:
+                            da_ritornare.append((mossa, 0))
+                        else:
+                            da_ritornare.append((mossa, 1))
         return da_ritornare
 
 def double_input() -> ((int, int), (int, int)):
@@ -441,12 +453,8 @@ def check_mate(pos, game, check):
             if (piece := game.gameboard[(i,j)]) is not None:
                 if not piece.get_color():
                     pedine_bianche.append(((i,j),piece))
-                    if piece.get_type() == 'K':
-                        game.pos_w_K = (i,j)
                 else:
                     pedine_nere.append(((i,j),piece))
-                    if piece.get_type() == 'k':
-                        game.pos_b_k = (i,j)
     if not game.color_check:
         for piece in pedine_nere:
             piece[1].find_valid_moves(piece[0], game.gameboard)
