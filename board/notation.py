@@ -9,13 +9,13 @@ def return_notation(tipo, pos, to, game, gameboard, promotion=None):
             mossa += lettere[pos[0]] + 'x'
         mossa += lettere[to[0]] + str(to[1]+1)
         if promotion != None:
-            if tipo in 'Qq':
+            if promotion in 'Qq':
                 tipo_pezzo = 'Q'
-            elif tipo in 'Rr':
+            elif promotion in 'Rr':
                 tipo_pezzo = 'R'
-            elif tipo in 'Bb':
+            elif promotion in 'Bb':
                 tipo_pezzo = 'B'
-            elif tipo in 'Nn':
+            elif promotion in 'Nn':
                 tipo_pezzo = 'N'
             mossa += '=' + tipo_pezzo
             space -= 2

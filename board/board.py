@@ -166,9 +166,10 @@ class CreateCanvasObject(object):
                 else:
                     text = ' | '
                 self.scacchiera.num_mosse += 1
-                text += return_notation(self.tipo, (self.start_x,self.start_y), self.to, self.scacchiera.game, gameboard, self.scacchiera.promozione)
+                text += return_notation(self.tipo, (self.start_x,self.start_y), self.to, self.scacchiera.game, gameboard, promotion=self.scacchiera.promozione)
                 self.scacchiera.text_area['state'] = 'normal'
                 self.scacchiera.text_area.insert(INSERT, text)
+                print('aaaa')
                 self.scacchiera.text_area['state'] = 'disabled'
                 self.rimuovi()
             elif str(var) in '456':
