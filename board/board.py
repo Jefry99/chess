@@ -511,6 +511,7 @@ class Scacchiera(Frame):
 
     def undo(self):
         self.game.undo()
+        self.game.update_castling_priviliges()
         self.pulisci_scacchiera()
         self.pezzi.clear()
         self.put_piece(self.game.make_matrix())

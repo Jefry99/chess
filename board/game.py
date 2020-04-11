@@ -29,9 +29,8 @@ class Game:
         self.w_kingside_cast = True
         self.w_queenside_cast = True
         self.history = []
-        self.last_b_move = []
-        self.last_w_move = []
         self.history.append(copy.deepcopy(self.gameboard))
+        self.castle_history = []
         self.num_move = 0
 
     def stall(self):
@@ -39,6 +38,12 @@ class Game:
 
     def endgame(self):
         self.is_game_alive = False
+
+    def update_castling_priviliges(self):
+        self.w_kingside_cast = self.gameboard[(0,8)]
+        self.w_queenside_cast = self.gameboard[(0,9)]
+        self.b_kingside_cast = self.gameboard[(0,10)]
+        self.b_queenside_cast = self.gameboard[(0,11)]
 
     def undo(self):
         self.en_passant.clear()
@@ -49,8 +54,14 @@ class Game:
                 self.player_turn = 0
             else:
                 self.player_turn = 1
-        
+     
+
     def check_move(self, pos, to):
+        #Salvo la possibilità di fare arrocco per entrambi i giocatori
+        self.gameboard[(0,8)] = self.w_kingside_cast
+        self.gameboard[(0,9)] = self.w_queenside_cast
+        self.gameboard[(0,10)] = self.b_kingside_cast
+        self.gameboard[(0,11)] = self.b_queenside_cast
         if self.is_game_alive:
             try:
                 target = self.gameboard[pos]
