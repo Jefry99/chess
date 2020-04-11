@@ -14,6 +14,8 @@ class Game:
         self.make_matrix()
         self.pos_of_promotion = None
         self.check = False
+        self.capture = False
+        self.draw_threefold_repetition = []
         self.color_check = None
         self.pos_w_K = ()
         self.pos_b_k = ()
@@ -54,6 +56,11 @@ class Game:
                 target = self.gameboard[pos]
             except:
                 return 0
+
+            if self.gameboard[to] != None:
+                self.capture = True
+            else:
+                self.capture = False
             
             if target:
                 if target.get_color() != self.player_turn:
@@ -75,6 +82,9 @@ class Game:
                                         del self.gameboard[self.en_passant[0]]
                                         self.gameboard[self.en_passant[0]] = None
                                     self.en_passant.clear()
+
+                                self.draw_threefold_repetition.append(self.make_matrix())
+
                                 self.check = check_check(target.get_color(), self.gameboard, self)
                                 if self.check:
                                     if not self.color_check:
@@ -84,7 +94,7 @@ class Game:
                                         if check_mate(self.pos_w_K, self, self.check):
                                             return 5
                                 else:
-                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self):
+                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self) or chech_stall_threefold_repetition(self):
                                         return 6
                                 if self.player_turn:
                                     self.player_turn = 0
@@ -108,6 +118,9 @@ class Game:
                                         del self.gameboard[self.en_passant[0]]
                                         self.gameboard[self.en_passant[0]] = None
                                     self.en_passant.clear()
+                                
+                                self.draw_threefold_repetition.append(self.make_matrix)
+
                                 self.check = check_check(target.get_color(), self.gameboard, self)
                                 if self.check:
                                     if not self.color_check:
@@ -117,7 +130,7 @@ class Game:
                                         if check_mate(self.pos_w_K, self, self.check):
                                             return 5
                                 else:
-                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self):
+                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self) or chech_stall_threefold_repetition(self):
                                         return 6
                                 if self.player_turn:
                                     self.player_turn = 0
@@ -142,6 +155,9 @@ class Game:
                                         del self.gameboard[self.en_passant[0]]
                                         self.gameboard[self.en_passant[0]] = None
                                     self.en_passant.clear()
+                                
+                                self.draw_threefold_repetition.append(self.make_matrix())
+
                                 self.check = check_check(target.get_color(), self.gameboard, self)
                                 if self.check:
                                     if not self.color_check:
@@ -151,7 +167,7 @@ class Game:
                                         if check_mate(self.pos_w_K, self, self.check):
                                             return 5
                                 else:
-                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self):
+                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self) or chech_stall_threefold_repetition(self):
                                         return 6
                                 if self.player_turn:
                                     self.player_turn = 0
@@ -175,6 +191,9 @@ class Game:
                                         del self.gameboard[self.en_passant[0]]
                                         self.gameboard[self.en_passant[0]] = None
                                     self.en_passant.clear()
+
+                                self.draw_threefold_repetition.append(self.make_matrix)
+
                                 self.check = check_check(target.get_color(), self.gameboard, self)
                                 if self.check:
                                     if not self.color_check:
@@ -184,7 +203,7 @@ class Game:
                                         if check_mate(self.pos_w_K, self, self.check):
                                             return 5
                                 else:
-                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self):
+                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self) or chech_stall_threefold_repetition(self):
                                         return 6
                                 if self.player_turn:
                                     self.player_turn = 0
@@ -243,7 +262,13 @@ class Game:
                             self.w_kingside_cast = self.w_queenside_cast = False
                         elif tipo == 'k':
                             self.b_kingside_cast = self.b_queenside_cast = False
-                        
+
+                        if self.capture:
+                            self.draw_threefold_repetition.clear()
+                            self.draw_threefold_repetition.append(self.make_matrix())
+                        else:
+                            self.draw_threefold_repetition.append(self.make_matrix())
+
                         self.check = check_check(target.get_color(), self.gameboard, self)
                         if self.check:
                             if not self.color_check:
@@ -253,7 +278,7 @@ class Game:
                                 if check_mate(self.pos_w_K, self, self.check):
                                     return 5
                         else:
-                            if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self):
+                            if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self) or chech_stall_threefold_repetition(self):
                                 return 6
                         if self.player_turn:
                             self.player_turn = 0
@@ -293,6 +318,9 @@ class Game:
             self.gameboard[self.pos_of_promotion] = Knight(1)
         elif tipo == 'b':
             self.gameboard[self.pos_of_promotion] = Bishop(1)
+
+        self.draw_threefold_repetition.clear()
+        self.draw_threefold_repetition.append(self.make_matrix())
 
         self.check = check_check(self.player_turn, self.gameboard, self)
         if self.check:
@@ -588,6 +616,18 @@ def chech_stall_insufficient_material(game):
                     print('STALL')
                     game.stall()
                     return True
+    return False
+
+def chech_stall_threefold_repetition(game):
+    print(game.draw_threefold_repetition)
+    for position1 in game.draw_threefold_repetition:
+        for position2 in game.draw_threefold_repetition:
+            a = 0
+            if [position1] == [position2]:
+                a += 1
+            print(a)
+            if a == 3:
+                return True
     return False
 
 def check_kingside_cast(color, gameboard, game):
