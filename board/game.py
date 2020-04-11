@@ -1,5 +1,6 @@
 from pieces import Pawn, King, Queen, Bishop, Knight, Rook, En_passant
 import copy
+import numpy as np
 #WHITE = 0
 #BLACK = 1
 dizionario = {"A": 0, "a": 0, "B": 1, "b": 1, "C": 2, "c": 2, "D": 3, "d": 3, "E": 4, "e": 4, "F": 5, "f": 5, "G": 6, "g": 6, "H": 7, "h": 7}
@@ -276,9 +277,9 @@ class Game:
 
                         if self.capture:
                             self.draw_threefold_repetition.clear()
-                            self.draw_threefold_repetition.append(self.make_matrix())
+                            self.draw_threefold_repetition.append(copy.deepcopy(self.make_matrix()))
                         else:
-                            self.draw_threefold_repetition.append(self.make_matrix())
+                            self.draw_threefold_repetition.append(copy.deepcopy(self.make_matrix()))
 
                         self.check = check_check(target.get_color(), self.gameboard, self)
                         if self.check:
@@ -630,15 +631,20 @@ def chech_stall_insufficient_material(game):
     return False
 
 def chech_stall_threefold_repetition(game):
-    print(game.draw_threefold_repetition)
     for position1 in game.draw_threefold_repetition:
+        a = 0
         for position2 in game.draw_threefold_repetition:
-            a = 0
-            if [position1] == [position2]:
+            b = False
+            if np.array_equal([position1], [position2]):
+                b = True
+            else:
+                b = False
+            if b:
                 a += 1
-            print(a)
-            if a == 3:
-                return True
+        if a == 3:
+            print('STALL')
+            game.stall()
+            return True
     return False
 
 def check_kingside_cast(color, gameboard, game):
