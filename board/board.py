@@ -38,6 +38,7 @@ class Timer(object):
         self.scacchiera.running_timer.run = False
         self.scacchiera.game.endgame()
         self.scacchiera.update_scores(not self.color)
+        self.scacchiera.rematch()
 
     def reset(self):
         self.min = 20
@@ -45,12 +46,19 @@ class Timer(object):
         self.label['text'] = str(self.min) + ':' + '{0:0=2d}'.format(int(self.sec))
 
 class DisplayMove(object):
-    def __init__(self, canvas, image_name, xpos, ypos, scacchiera):
+    def __init__(self, canvas, image_name, xpos, ypos, scacchiera, pezzo=None):
         self.canvas = canvas
         self.scacchiera = scacchiera
+        self.x, self.y = xpos, ypos
+        self.pezzo = pezzo
         self.image_name = image_name
         self.tk_image = tk.PhotoImage(file="{}".format(image_name))
         self.image_obj= self.canvas.create_image(xpos, ypos, image=self.tk_image)
+        canvas.tag_bind(self.image_obj, '<ButtonPress-1>', self.start1)
+
+    def start1(self, event):
+        if self.pezzo != None:
+            self.pezzo.release(event)
 
     def rimuovi(self):
         self.canvas.delete(self.image_obj)
@@ -81,7 +89,7 @@ class CreateCanvasObject(object):
         self.pos = (int(event.x/70), 7-int(event.y/70))
         self.start_x = int(event.x/70)
         self.start_y = int(event.y/70)
-        self.scacchiera.put_trackers(self.start_x, 7-self.start_y)
+        self.scacchiera.put_trackers(self.start_x, 7-self.start_y, self)
 
     def move(self, event):
         if not self.move_flag:
@@ -162,6 +170,7 @@ class CreateCanvasObject(object):
                     self.scacchiera.update_scores(3)
                 self.scacchiera.delete_trackers()
                 self.scacchiera.num_mosse += 1
+                self.scacchiera.rematch()
                 self.rimuovi()
             else:
                 a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera)
@@ -216,13 +225,13 @@ class Scacchiera(Frame):
         for trackers in self.trackers:
             trackers.rimuovi()
 
-    def put_trackers(self, x, y):
+    def put_trackers(self, x, y, pezzo):
         moves = self.game.return_target_moves(x,y)
         for move in moves:
             if move[1]:
-                a = DisplayMove(self.canvas, 'png/Capture.png', 35+70*(move[0][0]), 35+70*(7-move[0][1]), self)
+                a = DisplayMove(self.canvas, 'png/Capture.png', 35+70*(move[0][0]), 35+70*(7-move[0][1]), self, pezzo)
             else:
-                a = DisplayMove(self.canvas, 'png/AvaiableMove.png', 35+70*(move[0][0]), 35+70*(7-move[0][1]), self)
+                a = DisplayMove(self.canvas, 'png/AvaiableMove.png', 35+70*(move[0][0]), 35+70*(7-move[0][1]), self, pezzo)
             self.trackers.append(a)
 
     def disable_buttons(self):

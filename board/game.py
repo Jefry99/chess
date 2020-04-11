@@ -561,7 +561,6 @@ def chech_stall(color, game):
     return True
 
 def chech_stall_insufficient_material(game):
-    print(len(game.pedine_nere))
     if len(game.pedine_bianche) == 2:
         if len(game.pedine_nere) == 2:
             for pezzo_b in game.pedine_bianche:
