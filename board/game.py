@@ -58,12 +58,12 @@ class Game:
      
 
     def check_move(self, pos, to):
-        #Salvo la possibilità di fare arrocco per entrambi i giocatori
-        self.gameboard[(0,8)] = self.w_kingside_cast
-        self.gameboard[(0,9)] = self.w_queenside_cast
-        self.gameboard[(0,10)] = self.b_kingside_cast
-        self.gameboard[(0,11)] = self.b_queenside_cast
         if self.is_game_alive:
+            #Salvo la possibilità di fare arrocco per entrambi i giocatori
+            self.gameboard[(0,8)] = self.w_kingside_cast
+            self.gameboard[(0,9)] = self.w_queenside_cast
+            self.gameboard[(0,10)] = self.b_kingside_cast
+            self.gameboard[(0,11)] = self.b_queenside_cast
             try:
                 target = self.gameboard[pos]
             except:
@@ -106,7 +106,7 @@ class Game:
                                         if check_mate(self.pos_w_K, self, self.check):
                                             return 5
                                 else:
-                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self) or chech_stall_threefold_repetition(self):
+                                    if check_stall(self.player_turn, self) or check_stall_insufficient_material(self) or check_stall_threefold_repetition(self):
                                         return 6
                                 if self.player_turn:
                                     self.player_turn = 0
@@ -142,7 +142,7 @@ class Game:
                                         if check_mate(self.pos_w_K, self, self.check):
                                             return 5
                                 else:
-                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self) or chech_stall_threefold_repetition(self):
+                                    if check_stall(self.player_turn, self) or check_stall_insufficient_material(self) or check_stall_threefold_repetition(self):
                                         return 6
                                 if self.player_turn:
                                     self.player_turn = 0
@@ -179,7 +179,7 @@ class Game:
                                         if check_mate(self.pos_w_K, self, self.check):
                                             return 5
                                 else:
-                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self) or chech_stall_threefold_repetition(self):
+                                    if check_stall(self.player_turn, self) or check_stall_insufficient_material(self) or check_stall_threefold_repetition(self):
                                         return 6
                                 if self.player_turn:
                                     self.player_turn = 0
@@ -215,7 +215,7 @@ class Game:
                                         if check_mate(self.pos_w_K, self, self.check):
                                             return 5
                                 else:
-                                    if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self) or chech_stall_threefold_repetition(self):
+                                    if check_stall(self.player_turn, self) or check_stall_insufficient_material(self) or check_stall_threefold_repetition(self):
                                         return 6
                                 if self.player_turn:
                                     self.player_turn = 0
@@ -290,7 +290,7 @@ class Game:
                                 if check_mate(self.pos_w_K, self, self.check):
                                     return 5
                         else:
-                            if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self) or chech_stall_threefold_repetition(self):
+                            if check_stall(self.player_turn, self) or check_stall_insufficient_material(self) or check_stall_threefold_repetition(self):
                                 return 6
                         if self.player_turn:
                             self.player_turn = 0
@@ -343,7 +343,7 @@ class Game:
                 if check_mate(self.pos_w_K, self, self.check):
                     return 5
         else:
-            if chech_stall(self.player_turn, self) or chech_stall_insufficient_material(self):
+            if check_stall(self.player_turn, self) or check_stall_insufficient_material(self):
                 return 6
         if self.player_turn:
             self.player_turn = 0
@@ -404,9 +404,123 @@ class Game:
         print(' A  B  C  D  E  F  G  H')
         print('\n')
 
+    def check_same_peice(self, color, tipo, gameboard, to):
+        regine = []
+        torri = []
+        alfieri = []
+        cavalli = []
+        da_ritornare = []
+        if not color:
+            for i in range(8):
+                for j in range(8):
+                    if (piece := gameboard[(i,j)]) is not None:
+                        tipo1 = piece.get_type()
+                        if tipo1 == 'Q':
+                            regine.append(((i,j), piece))
+                        elif tipo1 == 'R':
+                            torri.append((i,j))
+                        elif tipo1 == 'B':
+                            alfieri.append((i,j))
+                        elif tipo1 == 'N':
+                            cavalli.append((i,j))
+            if tipo == 'Q':
+                if regine[0][0][0] == regine[1][0][0]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                if regine[0][0][1] == regine[1][0][1]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                regine[0][1].find_valid_moves(regine[0][0], gameboard)
+                if regine[0][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                regine[1][1].find_valid_moves(regine[1][0], gameboard)
+                if regine[1][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+        else:
+            for i in range(8):
+                for j in range(8):
+                    if (piece := gameboard[(i,j)]) is not None:
+                        tipo1 = piece.get_type()
+                        if tipo1 == 'q':
+                            regine.append(((i,j), piece))
+                        elif tipo1 == 'r':
+                            torri.append((i,j))
+                        elif tipo1 == 'b':
+                            alfieri.append((i,j))
+                        elif tipo1 == 'n':
+                            cavalli.append((i,j))
+            if tipo == 'Q':
+                if regine[0][0][0] == regine[1][0][0]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                if regine[0][0][1] == regine[1][0][1]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                regine[0][1].find_valid_moves(regine[0][0], gameboard)
+                if regine[0][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                regine[1][1].find_valid_moves(regine[1][0], gameboard)
+                if regine[1][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+        return da_ritornare
+
+    def count_piece(self, color):
+        n_regine = 0
+        n_alfieri = 0
+        n_cavalli = 0
+        n_torri = 0
+        if not color:
+            for i in range(8):
+                for j in range(8):
+                    piece = self.gameboard[(i,j)]
+                    try:
+                        tipo = str(piece.get_type())
+                    except:
+                        tipo = ''
+                        pass
+                    if tipo == 'Q':
+                        n_regine += 1
+                    elif tipo == 'R':
+                        n_torri += 1
+                    elif tipo == 'N':
+                        n_cavalli += 1
+                    elif tipo == 'B':
+                        n_alfieri += 1
+        else:
+            for i in range(8):
+                for j in range(8):
+                    piece = self.gameboard[(i,j)]
+                    try:
+                        tipo = str(piece.get_type())
+                    except:
+                        tipo = ''
+                        pass
+                    if tipo == 'q':
+                        n_regine += 1
+                    elif tipo == 'r':
+                        n_torri += 1
+                    elif tipo == 'n':
+                        n_cavalli += 1
+                    elif tipo == 'b':
+                        n_alfieri += 1
+        return [n_regine, n_torri, n_alfieri, n_cavalli]
+
     def return_target_moves(self, x, y):
         da_ritornare = []
         pezzo = self.gameboard[(x,y)]
+        tipo = pezzo.get_type()
         if pezzo.color == self.player_turn and self.is_game_alive:
             if not self.check:
                 if pezzo.get_type() in 'Kk':
@@ -437,7 +551,7 @@ class Game:
                             da_ritornare.append((mossa, 0))
                         else:
                             da_ritornare.append((mossa, 1))
-        return da_ritornare
+        return da_ritornare, tipo
 
 def double_input() -> ((int, int), (int, int)):
     print('prima la casella corrente poi destinazione, es: a2 a4')
@@ -585,7 +699,7 @@ def check_check(color, gameboard, game):
                 return True
     return False
 
-def chech_stall(color, game):
+def check_stall(color, game):
     if not color:
         for piece in game.pedine_nere:
             piece[1].find_valid_moves(piece[0], game.gameboard)
@@ -600,7 +714,7 @@ def chech_stall(color, game):
     game.stall()
     return True
 
-def chech_stall_insufficient_material(game):
+def check_stall_insufficient_material(game):
     if len(game.pedine_bianche) == 2:
         if len(game.pedine_nere) == 2:
             for pezzo_b in game.pedine_bianche:
@@ -630,7 +744,7 @@ def chech_stall_insufficient_material(game):
                     return True
     return False
 
-def chech_stall_threefold_repetition(game):
+def check_stall_threefold_repetition(game):
     for position1 in game.draw_threefold_repetition:
         a = 0
         for position2 in game.draw_threefold_repetition:
