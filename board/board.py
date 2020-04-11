@@ -126,8 +126,16 @@ class CreateCanvasObject(object):
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
                 self.scacchiera.running_timer.start()
                 self.scacchiera.delete_trackers()
+                if self.scacchiera.num_mosse % 2 == 0:
+                    self.scacchiera.num_mosse_da_scrivere += 1
+                    text = '\n  ' + str(self.scacchiera.num_mosse_da_scrivere) + '. '
+                else:
+                    text = ' | '
                 self.scacchiera.num_mosse += 1
-                print(return_notation(self.tipo, (self.start_x,self.start_y), self.to, self.scacchiera.game, gameboard))
+                text += return_notation(self.tipo, (self.start_x,self.start_y), self.to, self.scacchiera.game, gameboard)
+                self.scacchiera.text_area['state'] = 'normal'
+                self.scacchiera.text_area.insert(INSERT, text)
+                self.scacchiera.text_area['state'] = 'disabled'
                 self.rimuovi()
                 #CreateCanvasObject(self.canvas, self.image_name, 35+70*(quadro[0]), 35+70*(quadro[1]), self.scacchiera)
                 #self.canvas.delete(self.image_obj)
@@ -152,7 +160,16 @@ class CreateCanvasObject(object):
                 self.scacchiera.pezzi.append(a)
                 self.scacchiera.running_timer.start()
                 self.scacchiera.delete_trackers()
+                if self.scacchiera.num_mosse % 2 == 0:
+                    self.scacchiera.num_mosse_da_scrivere += 1
+                    text = '\n  ' + str(self.scacchiera.num_mosse_da_scrivere) + '. '
+                else:
+                    text = ' | '
                 self.scacchiera.num_mosse += 1
+                text += return_notation(self.tipo, (self.start_x,self.start_y), self.to, self.scacchiera.game, gameboard, self.scacchiera.promozione)
+                self.scacchiera.text_area['state'] = 'normal'
+                self.scacchiera.text_area.insert(INSERT, text)
+                self.scacchiera.text_area['state'] = 'disabled'
                 self.rimuovi()
             elif str(var) in '456':
                 self.scacchiera.running_timer.run = False
@@ -174,7 +191,16 @@ class CreateCanvasObject(object):
                     print('Patta')
                     self.scacchiera.update_scores(3)
                 self.scacchiera.delete_trackers()
+                if self.scacchiera.num_mosse % 2 == 0:
+                    self.scacchiera.num_mosse_da_scrivere += 1
+                    text = '\n  ' + str(self.scacchiera.num_mosse_da_scrivere) + '. '
+                else:
+                    text = ' | '
                 self.scacchiera.num_mosse += 1
+                text += return_notation(self.tipo, (self.start_x,self.start_y), self.to, self.scacchiera.game, gameboard)
+                self.scacchiera.text_area['state'] = 'normal'
+                self.scacchiera.text_area.insert(INSERT, text)
+                self.scacchiera.text_area['state'] = 'disabled'
                 self.scacchiera.rematch()
                 self.rimuovi()
             else:
@@ -220,7 +246,9 @@ class Scacchiera(Frame):
         self.trackers = []
         self.check_tracker = None
         self.developer_mode = False
+        self.text_area = None
         self.num_mosse = 0
+        self.num_mosse_da_scrivere = 0
         self.make_home()
 
     def rematch(self):
@@ -513,6 +541,9 @@ class Scacchiera(Frame):
             self.rematch_button.grid_forget()
         except:
             pass
+        self.text_area['state'] = 'normal'
+        self.text_area.delete('1.0', END)
+        self.text_area['state'] = 'disabled'
         print('Resetted')
 
     def undo(self):
@@ -615,7 +646,8 @@ class Scacchiera(Frame):
         b1.grid(row=0, column=4, pady=(60,0))
         b2 = Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=1: self.give_up(x)), width=2, height=1, highlightthickness = 0)
         b2.grid(row=0, column=5, pady=(60,0))
-        Text(self.frame7, bg=BACKGROUND, font=('Helvetica', 20), width=30, height=10, pady=20).grid(row=1, column=0, columnspan=6)
+        self.text_area = Text(self.frame7, bg=BACKGROUND, state='disabled', font=('Helvetica', 20), width=30, height=10, pady=20)
+        self.text_area.grid(row=1, column=0, columnspan=6)
         Label(self.frame7, text='Player 1', bg=BACKGROUND, font=('Helvetica', 20), width=10, anchor='w').grid(row=2, column=0)
         w_timer = Label(self.frame7, text='', font=('Helvetica', 20), bg=BACKGROUND)
         self.white_timer = Timer(20, 0, 0, w_timer, self)

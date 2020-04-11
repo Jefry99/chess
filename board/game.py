@@ -418,11 +418,11 @@ class Game:
                         if tipo1 == 'Q':
                             regine.append(((i,j), piece))
                         elif tipo1 == 'R':
-                            torri.append((i,j))
+                            torri.append(((i,j), piece))
                         elif tipo1 == 'B':
-                            alfieri.append((i,j))
+                            alfieri.append(((i,j), piece))
                         elif tipo1 == 'N':
-                            cavalli.append((i,j))
+                            cavalli.append(((i,j), piece))
             if tipo == 'Q':
                 if regine[0][0][0] == regine[1][0][0]:
                     da_ritornare.append(1)
@@ -439,6 +439,63 @@ class Game:
                     da_ritornare.append(0)
                 regine[1][1].find_valid_moves(regine[1][0], gameboard)
                 if regine[1][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+            elif tipo == 'R':
+                if torri[0][0][0] == torri[1][0][0]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                if torri[0][0][1] == torri[1][0][1]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                torri[0][1].find_valid_moves(torri[0][0], gameboard)
+                if torri[0][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                torri[1][1].find_valid_moves(torri[1][0], gameboard)
+                if torri[1][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+            elif tipo == 'B':
+                if alfieri[0][0][0] == alfieri[1][0][0]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                if alfieri[0][0][1] == alfieri[1][0][1]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                alfieri[0][1].find_valid_moves(alfieri[0][0], gameboard)
+                if alfieri[0][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                alfieri[1][1].find_valid_moves(alfieri[1][0], gameboard)
+                if alfieri[1][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+            elif tipo == 'N':
+                if cavalli[0][0][0] == cavalli[1][0][0]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                if cavalli[0][0][1] == cavalli[1][0][1]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                cavalli[0][1].find_valid_moves(cavalli[0][0], gameboard)
+                if cavalli[0][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                cavalli[1][1].find_valid_moves(cavalli[1][0], gameboard)
+                if cavalli[1][1].is_valid(to):
                     da_ritornare.append(1)
                 else:
                     da_ritornare.append(0)
@@ -450,11 +507,11 @@ class Game:
                         if tipo1 == 'q':
                             regine.append(((i,j), piece))
                         elif tipo1 == 'r':
-                            torri.append((i,j))
+                            torri.append(((i,j), piece))
                         elif tipo1 == 'b':
-                            alfieri.append((i,j))
+                            alfieri.append(((i,j), piece))
                         elif tipo1 == 'n':
-                            cavalli.append((i,j))
+                            cavalli.append(((i,j), piece))
             if tipo == 'Q':
                 if regine[0][0][0] == regine[1][0][0]:
                     da_ritornare.append(1)
@@ -471,6 +528,63 @@ class Game:
                     da_ritornare.append(0)
                 regine[1][1].find_valid_moves(regine[1][0], gameboard)
                 if regine[1][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+            elif tipo == 'R':
+                if torri[0][0][0] == torri[1][0][0]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                if torri[0][0][1] == torri[1][0][1]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                torri[0][1].find_valid_moves(torri[0][0], gameboard)
+                if torri[0][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                torri[1][1].find_valid_moves(torri[1][0], gameboard)
+                if torri[1][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+            elif tipo == 'B':
+                if alfieri[0][0][0] == alfieri[1][0][0]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                if alfieri[0][0][1] == alfieri[1][0][1]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                alfieri[0][1].find_valid_moves(alfieri[0][0], gameboard)
+                if alfieri[0][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                alfieri[1][1].find_valid_moves(alfieri[1][0], gameboard)
+                if alfieri[1][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+            elif tipo == 'N':
+                if cavalli[0][0][0] == cavalli[1][0][0]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                if cavalli[0][0][1] == cavalli[1][0][1]:
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                cavalli[0][1].find_valid_moves(cavalli[0][0], gameboard)
+                if cavalli[0][1].is_valid(to):
+                    da_ritornare.append(1)
+                else:
+                    da_ritornare.append(0)
+                cavalli[1][1].find_valid_moves(cavalli[1][0], gameboard)
+                if cavalli[1][1].is_valid(to):
                     da_ritornare.append(1)
                 else:
                     da_ritornare.append(0)
