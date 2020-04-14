@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import *
-from game import Game
+from game import *
+import numpy as np
 from notation import return_notation
 from collections import defaultdict
 import copy
@@ -136,6 +137,12 @@ class CreateCanvasObject(object):
                 self.scacchiera.text_area['state'] = 'normal'
                 self.scacchiera.text_area.insert(INSERT, text)
                 self.scacchiera.text_area['state'] = 'disabled'
+                fen = self.scacchiera.game.return_fen()
+                print(fen)
+                matrici = cnn_input(fen)
+                for matrice in matrici:
+                    print(matrice)
+                    print()
                 self.rimuovi()
                 #CreateCanvasObject(self.canvas, self.image_name, 35+70*(quadro[0]), 35+70*(quadro[1]), self.scacchiera)
                 #self.canvas.delete(self.image_obj)

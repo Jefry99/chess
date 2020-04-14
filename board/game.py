@@ -4,6 +4,14 @@ import numpy as np
 #WHITE = 0
 #BLACK = 1
 dizionario = {"A": 0, "a": 0, "B": 1, "b": 1, "C": 2, "c": 2, "D": 3, "d": 3, "E": 4, "e": 4, "F": 5, "f": 5, "G": 6, "g": 6, "H": 7, "h": 7}
+lettere = {0:'a', 1:'b', 2:'c', 3:'d', 4:'e', 5:'f', 6:'g', 7:'h'}
+
+pieces_order = 'KQRBNPkqrbnp' # 12x8x8
+castling_order = 'KQkq'       # 4x8x8
+# fifty-move-rule             # 1x8x8
+# en en_passant               # 1x8x8
+
+pezzi = {pieces_order[i]: i for i in range(12)}
 
 class Game:
     
@@ -29,6 +37,7 @@ class Game:
         self.b_queenside_cast = True
         self.w_kingside_cast = True
         self.w_queenside_cast = True
+        self.fifty_move_draw = 0
         self.history = []
         self.history.append(copy.deepcopy(self.gameboard))
         self.castle_history = []
@@ -96,6 +105,7 @@ class Game:
                                     self.en_passant.clear()
 
                                 self.draw_threefold_repetition.append(self.make_matrix())
+                                self.fifty_move_draw += 1
 
                                 self.check = check_check(target.get_color(), self.gameboard, self)
                                 if self.check:
@@ -132,6 +142,7 @@ class Game:
                                     self.en_passant.clear()
                                 
                                 self.draw_threefold_repetition.append(self.make_matrix)
+                                self.fifty_move_draw += 1
 
                                 self.check = check_check(target.get_color(), self.gameboard, self)
                                 if self.check:
@@ -169,6 +180,7 @@ class Game:
                                     self.en_passant.clear()
                                 
                                 self.draw_threefold_repetition.append(self.make_matrix())
+                                self.fifty_move_draw += 1
 
                                 self.check = check_check(target.get_color(), self.gameboard, self)
                                 if self.check:
@@ -205,6 +217,7 @@ class Game:
                                     self.en_passant.clear()
 
                                 self.draw_threefold_repetition.append(self.make_matrix)
+                                self.fifty_move_draw += 1
 
                                 self.check = check_check(target.get_color(), self.gameboard, self)
                                 if self.check:
@@ -260,6 +273,7 @@ class Game:
                             if check_promotion(target, to, self):
                                 return 2
                             check_enpassant(pos, to, self)
+                            self.draw_threefold_repetition.clear()
                         elif tipo == 'R':
                             if pos == (0,0):
                                 self.w_queenside_cast = False
@@ -280,6 +294,11 @@ class Game:
                             self.draw_threefold_repetition.append(copy.deepcopy(self.make_matrix()))
                         else:
                             self.draw_threefold_repetition.append(copy.deepcopy(self.make_matrix()))
+                        
+                        if not self.capture and tipo not in 'Pp':
+                            self.fifty_move_draw += 1
+                        else:
+                            self.fifty_move_draw = 0
 
                         self.check = check_check(target.get_color(), self.gameboard, self)
                         if self.check:
@@ -333,6 +352,7 @@ class Game:
 
         self.draw_threefold_repetition.clear()
         self.draw_threefold_repetition.append(self.make_matrix())
+        self.fifty_move_draw = 0
 
         self.check = check_check(self.player_turn, self.gameboard, self)
         if self.check:
@@ -630,6 +650,48 @@ class Game:
                     elif tipo == 'b':
                         n_alfieri += 1
         return [n_regine, n_torri, n_alfieri, n_cavalli]
+
+    def return_fen(self):
+        fen = '/'
+        row = []
+        for i in reversed(range(8)):
+            space = 0
+            s = ''
+            for j in range(8):
+                if self.gameboard[(j,i)] is not None:
+                    if self.gameboard[(j,i)].get_type() not in 'Ee':
+                        if space != 0:
+                            s += str(space)
+                            space = 0
+                        s += self.gameboard[(j,i)].get_type()
+                    else:
+                        space += 1
+                else:
+                    space += 1
+            if space != 0:
+                s += str(space)
+            row.append(s)
+        fen = fen.join(row) + ' '
+        fen += 'b ' if self.player_turn else 'w '
+        cast = ''
+        if self.w_kingside_cast:
+            cast += 'K'
+        if self.w_queenside_cast:
+            cast += 'Q'
+        if self.b_kingside_cast:
+            cast += 'k'
+        if self.b_queenside_cast:
+            cast += 'q'
+        if cast == '':
+            fen += '- '
+        else:
+            fen += cast + ' '
+        if len(self.en_passant) == 0:
+            fen += '- '
+        else:
+            fen += lettere[self.en_passant[0][0]] + str(self.en_passant[0][1] + 1) + ' '
+        fen += str(self.fifty_move_draw) + ' '
+        return fen
 
     def return_target_moves(self, x, y):
         da_ritornare = []
@@ -938,6 +1000,87 @@ def check_queenside_cast(color, gameboard, game):
                 return 0
         else:
             return 0
+
+def cnn_input(fen):
+    fen = maybe_reverse_fen(fen, black_turn(fen))
+    return input_cnn(fen) # 18x8x8 matrix
+
+def black_turn(fen):
+    return fen.split(" ")[1] == 'b'
+
+def maybe_reverse_fen(fen, flip = False):
+    if not flip:
+        return fen
+    foo = fen.split(' ')
+    rows = foo[0].split('/')
+    def swapcase(a):
+        if a.isalpha():
+            return a.lower() if a.isupper() else a.upper()
+        return a
+    def swapall(aa):
+        return "".join([swapcase(a) for a in aa])
+    return "/".join([swapall(row) for row in reversed(rows)]) \
+        + " " + ('w' if foo[1] == 'b' else 'b') \
+        + " " + "".join(sorted(swapall(foo[2]))) \
+        + " " + foo[3] + " " + foo[4] + " " + foo[5]
+
+def input_cnn(fen):
+    matrici_pezzi = make_matrici_pezzi(fen)
+    matrici_mosse_speciali = make_matrici_speciali(fen)
+    matrici_input = np.vstack((matrici_pezzi, matrici_mosse_speciali))
+    assert matrici_input.shape == (18, 8, 8)
+    return matrici_input
+
+def make_matrici_speciali(fen):
+    foo = fen.split(' ')
+
+    en_passant = np.zeros((8, 8), dtype=np.float32)
+    if foo[3] != '-':
+        eps = alg_to_coord(foo[3])
+        en_passant[eps[0]][eps[1]] = 1
+
+    fifty_move_count = int(foo[4])
+    fifty_move = np.full((8, 8), fifty_move_count, dtype=np.float32)
+
+    castling = foo[2]
+    auxiliary_planes = [np.full((8, 8), int('K' in castling), dtype=np.float32),
+                        np.full((8, 8), int('Q' in castling), dtype=np.float32),
+                        np.full((8, 8), int('k' in castling), dtype=np.float32),
+                        np.full((8, 8), int('q' in castling), dtype=np.float32),
+                        fifty_move,
+                        en_passant]
+
+    ret = np.asarray(auxiliary_planes, dtype=np.float32)
+    assert ret.shape == (6, 8, 8)
+    return ret
+
+def alg_to_coord(alg):
+    rank = 8 - int(alg[1])        # 0-7
+    file = ord(alg[0]) - ord('a') # 0-7
+    return rank, file
+
+def make_matrici_pezzi(fen):
+    fen_board = replace_tags(fen)
+    pieces_both = np.zeros(shape=(12, 8, 8), dtype=np.float32)
+    for rank in range(8):
+        for file in range(8):
+            v = fen_board[rank * 8 + file]
+            if v.isalpha():
+                pieces_both[pezzi[v]][rank][file] = 1
+    assert pieces_both.shape == (12, 8, 8)
+    return pieces_both
+
+
+def replace_tags(board):
+    board = board.split(" ")[0]
+    board = board.replace("2", "11")
+    board = board.replace("3", "111")
+    board = board.replace("4", "1111")
+    board = board.replace("5", "11111")
+    board = board.replace("6", "111111")
+    board = board.replace("7", "1111111")
+    board = board.replace("8", "11111111")
+    return board.replace("/", "")
 
 def main():
     game = Game()
