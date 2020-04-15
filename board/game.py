@@ -1070,6 +1070,26 @@ def make_matrici_pezzi(fen):
     assert pieces_both.shape == (12, 8, 8)
     return pieces_both
 
+def ai_move(move):
+    col1 = move[0]
+    row1 = move[1]
+    col2 = move[2]
+    row2 = move[3]
+    switcher = {
+        'a': 0,
+        'b': 1,
+        'c': 2, 
+        'd': 3,
+        'e': 4,
+        'f': 5,
+        'g': 6,
+        'h': 7
+    }
+    c1 = switcher.get(col1)
+    c2 = switcher.get(col2)
+    return((c1, int(row1)-1), (c2, int(row2)-1))
+
+
 
 def replace_tags(board):
     board = board.split(" ")[0]
@@ -1087,6 +1107,7 @@ def main():
     while True:
         game.print_board()
         pos, to = double_input()
+        #pos_ai, to_ai = ai_move("a2a4")
         game.check_move(pos, to)
 
 if __name__ == "__main__":
