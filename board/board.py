@@ -11,6 +11,8 @@ import csv
 
 from ai_non_nostra.config import Config
 from ai_non_nostra.model_chess import ChessModel
+from ai_non_nostra.player_chess import ChessPlayer
+from multiprocessing import Manager
 
 # QUESTO E' IL CODICE MODIFICATO AL FINE DI INTRODURRE UNA AI DI CREAZIONE NON NOSTRA ALL'INTERNO DEL CODICE
 
@@ -35,6 +37,9 @@ class SelfPlayWorker:
     def __init__(self, config: Config):
         self.config = config
         self.current_model = self.load_model()
+        self.m = Manager()
+        self.cur_pipes = self.m.list(self.current_model.get_pipes(16))
+        #self.cur_pipes = self.m.list([self.current_model.get_pipes(self.config.play.search_threads) for _ in range(self.config.play.max_processes)])
 
     def load_model(self):
         """
@@ -77,7 +82,7 @@ class Timer(object):
     
     def lose(self):
         self.scacchiera.running_timer.run = False
-        self.scacchiera.game.endgame()
+        self.scacchiera.game.endgame(self.color)
         self.scacchiera.update_scores(not self.color)
         self.scacchiera.rematch()
 
@@ -259,6 +264,8 @@ class CreateCanvasObject(object):
                 a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera, self.tipo, self.player)
                 self.scacchiera.pezzi.append(a)
                 self.rimuovi()
+
+            self.scacchiera.ai_move()
             #self.canvas.itemconfig(self.canvas.find_withtag('ciao0', fill='blue')
             #print(self.canvas.find_withtag('ciao{}'.format(quadro)))
             #print(self.canvas.coords(self.canvas.find_withtag('ciao1')))
@@ -302,6 +309,7 @@ class Scacchiera(Frame):
         self.num_mosse = 0
         self.num_mosse_da_scrivere = 0
         self.worker = None
+        self.ai = None
         self.make_home()
 
     def rematch(self):
@@ -391,7 +399,7 @@ class Scacchiera(Frame):
                 self.button[5]['state'] = 'disabled'
         elif self.give_up_color == color:
             self.running_timer.run = False
-            self.game.endgame()
+            self.game.endgame(color)
             self.disable_buttons()
             self.update_scores(not color)
             self.rematch()
@@ -765,6 +773,7 @@ class Scacchiera(Frame):
         self.make_for_ai()
         self.game = Game()
         self.put_piece(self.game.make_matrix())
+        self.ai_move()
 
     def make_for_ai(self):
         self.frame2.grid(row=0, column=1)
@@ -888,6 +897,12 @@ class Scacchiera(Frame):
         self.score_cells.append(ll)
         self.load_score()
         self.worker = Worker()
+        self.ai = ChessPlayer(self.worker.config, pipes=self.worker.model.cur_pipes)
+
+    def ai_move(self):
+        if self.game.player_turn:
+            mossa = self.ai.action(self.game)
+            print(mossa)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

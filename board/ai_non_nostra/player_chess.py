@@ -7,11 +7,11 @@ from concurrent.futures import ThreadPoolExecutor
 from logging import getLogger
 from threading import Lock
 
-import chess
 import numpy as np
+import copy
 
-from chess_zero.config import Config
-from chess_zero.env.chess_env import ChessEnv, Winner
+from game import Game, Winner, input_cnn, ai_move
+from ai_non_nostra.config import Config
 
 logger = getLogger(__name__)
 
@@ -84,7 +84,8 @@ class ChessPlayer:
         self.play_config = play_config or self.config.play
         self.labels_n = config.n_labels
         self.labels = config.labels
-        self.move_lookup = {chess.Move.from_uci(move): i for move, i in zip(self.labels, range(self.labels_n))}
+        #self.move_lookup = {chess.Move.from_uci(move): i for move, i in zip(self.labels, range(self.labels_n))}
+        self.move_lookup = {self.labels[i]: i for move, i in zip(self.labels, range(self.labels_n))}
         if dummy:
             return
 
@@ -116,7 +117,7 @@ class ChessPlayer:
                   f'q: {s[2]:7.3f} '
                   f'p: {s[3]:7.5f}')
 
-    def action(self, env, can_stop = True) -> str:
+    def action(self, env: Game, can_stop = True) -> str:
         """
         Figures out the next best move
         within the specified environment and returns a string describing the action to take.
@@ -133,18 +134,18 @@ class ChessPlayer:
         policy = self.calc_policy(env)
         # le policy sono la lista con tutte le probabilità di scegliere una determinata mossa che viene
         # calcolata in base al numero di passaggi della nns in un nodo che è il figlio della radice dell'albero
-        my_action = int(np.random.choice(range(self.labels_n), p = self.apply_temperature(policy, env.num_halfmoves)))
+        my_action = int(np.random.choice(range(self.labels_n), p = self.apply_temperature(policy, env.num_move)))
         # la mossa successiva viene scelta random dalla distribuzione di probabiltià delle policy
         # e successivamente viene applicata una temperatura alle policy per penalizzare ed evitare che la ai scelga 
         # sempre la stessa strada
 
         if can_stop and self.play_config.resign_threshold is not None and \
                         root_value <= self.play_config.resign_threshold \
-                        and env.num_halfmoves > self.play_config.min_resign_turn:
+                        and env.num_move > self.play_config.min_resign_turn:
             # noinspection PyTypeChecker
             return None
         else:
-            self.moves.append([env.observation, list(policy)])
+            self.moves.append([env.return_fen(), list(policy)])
             return self.config.labels[my_action]
 
     def search_moves(self, env) -> (float, float):
@@ -160,14 +161,14 @@ class ChessPlayer:
         futures = []
         with ThreadPoolExecutor(max_workers=self.play_config.search_threads) as executor:
             for _ in range(self.play_config.simulation_num_per_move):
-                futures.append(executor.submit(self.search_my_move,env=env.copy(),is_root_node=True))
+                futures.append(executor.submit(self.search_my_move,env=copy.deepcopy(env),is_root_node=True))
         # vengono creati self.play_config.search_threads threads dove si chiede alla ai di analizzare nella ricerca di nuove mosse
 
         vals = [f.result() for f in futures]
 
         return np.max(vals), vals[0] # vals[0] is kind of racy
 
-    def search_my_move(self, env: ChessEnv, is_root_node=False) -> float:
+    def search_my_move(self, env: Game, is_root_node=False) -> float:
         """
         Q, V is value for this Player(always white).
         P is value for the player of next_player (black or white)
@@ -180,7 +181,7 @@ class ChessPlayer:
         :return float: value of the move. This is calculated by getting a prediction
             from the value network.
         """
-        if env.done:
+        if env.done():
             if env.winner == Winner.draw:
                 return 0
             # assert env.whitewon != env.white_to_move # side to move can't be winner!
@@ -199,6 +200,7 @@ class ChessPlayer:
 
             # SELECT STEP
             action_t = self.select_action_q_and_u(env, is_root_node)
+            action_t = ai_move(action_t)
 
             virtual_loss = self.play_config.virtual_loss
 
@@ -210,7 +212,8 @@ class ChessPlayer:
             my_stats.w += -virtual_loss
             my_stats.q = my_stats.w / my_stats.n
 
-        env.step(action_t.uci())
+        env.check_move(action_t[0], action_t[1])
+        #env.step(action_t.uci())----------------------------------------------------------------------------------------------------
         leaf_v = self.search_my_move(env)  # next move from enemy POV
         leaf_v = -leaf_v
 
@@ -225,7 +228,7 @@ class ChessPlayer:
 
         return leaf_v
 
-    def expand_and_evaluate(self, env) -> (np.ndarray, float):
+    def expand_and_evaluate(self, env: Game) -> (np.ndarray, float):
         """ expand new leaf, this is called only once per state
         this is called with state locked
         insert P(a|s), return leaf_v
@@ -233,16 +236,16 @@ class ChessPlayer:
         This gets a prediction for the policy and value of the state within the given env
         :return (float, float): the policy and value predictions for this state
         """
-        state_planes = env.canonical_input_planes()
+        state_planes = input_cnn(env.return_fen())
 
         leaf_p, leaf_v = self.predict(state_planes)
         # these are canonical policy and value (i.e. side to move is "white")
 
-        if not env.white_to_move:
-            leaf_p = Config.flip_policy(leaf_p) # get it back to python-chess form
+        if not env.white_to_move():
+            leaf_p = Config.flip_policy(leaf_p) # get it back to python-chess form------------------------------------------------------
 
         return leaf_p, leaf_v
-
+    
     def predict(self, state_planes):
         """
         Gets a prediction from the policy and value network
@@ -255,9 +258,9 @@ class ChessPlayer:
         ret = pipe.recv()
         self.pipe_pool.append(pipe)
         return ret
-
+    
     #@profile
-    def select_action_q_and_u(self, env, is_root_node) -> chess.Move:
+    def select_action_q_and_u(self, env: Game, is_root_node) -> str:
         """
         Picks the next action to explore using the AGZ MCTS algorithm.
 
@@ -275,7 +278,7 @@ class ChessPlayer:
 
         if my_visitstats.p is not None: #push p to edges
             tot_p = 1e-8
-            for mov in env.board.legal_moves:
+            for mov in env.return_avaiable_moves():
                 mov_p = my_visitstats.p[self.move_lookup[mov]]
                 my_visitstats.a[mov].p = mov_p
                 tot_p += mov_p
@@ -341,7 +344,7 @@ class ChessPlayer:
         policy /= np.sum(policy)
         # le policy sono calcolate in base al numero di volte che la nns attraversa questa posizione
         return policy
-
+    '''
     def sl_action(self, observation, my_action, weight=1):
         """
         Logs the action in self.moves. Useful for generating a game using game data.
@@ -358,7 +361,7 @@ class ChessPlayer:
 
         self.moves.append([observation, list(policy)])
         return my_action
-
+    '''
     def finish_game(self, z):
         """
         When game is done, updates the value of all past moves based on the result.
@@ -371,10 +374,10 @@ class ChessPlayer:
             move += [z]
 
 
-def state_key(env: ChessEnv) -> str:
+def state_key(env: Game) -> str:
     """
     :param ChessEnv env: env to encode
     :return str: a str representation of the game state
     """
-    fen = env.board.fen().rsplit(' ', 1) # drop the move clock
+    fen = env.return_fen().rsplit(' ', 1) # drop the move clock
     return fen[0]

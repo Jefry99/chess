@@ -22,6 +22,11 @@ castling_order = 'KQkq'       # 4x8x8
 
 pezzi = {pieces_order[i]: i for i in range(12)}
 
+class Winner:
+    draw = -1
+    white = 0
+    black = 1
+
 class Game:
     
     def __init__(self):
@@ -51,12 +56,24 @@ class Game:
         self.history.append(copy.deepcopy(self.gameboard))
         self.castle_history = []
         self.num_move = 0
+        self.winner = None
+
+    def white_to_move(self):
+        return self.player_turn == 0
+
+    def done(self):
+        return self.winner is not None
 
     def stall(self):
         self.is_game_alive = False
+        self.winner = Winner.draw
 
-    def endgame(self):
+    def endgame(self, color):
         self.is_game_alive = False
+        if not color:
+            self.winner = Winner.white
+        else:
+            self.winner = Winner.black
 
     def update_castling_priviliges(self):
         self.w_kingside_cast = self.gameboard[(0,8)]
@@ -706,7 +723,9 @@ class Game:
         fen += str(self.fifty_move_draw) + ' '
         return fen
 
-    def return_avaiable_moves(self, color):
+    def return_avaiable_moves(self, color=None):
+        if color == None:
+            color = self.player_turn
         da_ritornare = []
         pedine_nere = []
         pedine_bianche = []
@@ -890,7 +909,7 @@ def check_mate(pos, game, check):
                 mate.append(0)
     if 0 not in mate:
         print('CHECKMATE')
-        game.endgame()
+        game.endgame(game.color_check)
         return True
 
 def check_check(color, gameboard, game):
@@ -1128,8 +1147,6 @@ def ai_move(move):
     c1 = switcher.get(col1)
     c2 = switcher.get(col2)
     return((c1, int(row1)-1), (c2, int(row2)-1))
-
-
 
 def replace_tags(board):
     board = board.split(" ")[0]

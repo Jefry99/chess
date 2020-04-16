@@ -16,6 +16,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
 
 from ai_non_nostra.config import Config
+from ai_non_nostra.api_chess import ChessModelAPI
 
 # noinspection PyPep8Naming
 
@@ -34,8 +35,22 @@ class ChessModel:
     """
     def __init__(self, config: Config):
         self.config = config
+        self.api = None
         self.model = None  # type: Model
         self.digest = None
+
+    def get_pipes(self, num = 1):
+        """
+        Creates a list of pipes on which observations of the game state will be listened for. Whenever
+        an observation comes in, returns policy and value network predictions on that pipe.
+
+        :param int num: number of pipes to create
+        :return str(Connection): a list of all connections to the pipes that were created
+        """
+        if self.api is None:
+            self.api = ChessModelAPI(self)
+            self.api.start()
+        return [self.api.create_pipe() for _ in range(num)]
 
     def build(self):
         """
