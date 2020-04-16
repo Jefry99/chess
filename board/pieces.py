@@ -549,7 +549,8 @@ def check_check(color, gameboard):
     pos_b_k = ()
     for i in range(8):
         for j in range(8):
-            if (piece := gameboard[(i,j)]) is not None:
+            piece = gameboard[(i,j)]
+            if piece is not None:
                 if not piece.get_color():
                     pedine_bianche.append(((i,j),piece))
                     if piece.get_type() == 'K':

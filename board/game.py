@@ -391,7 +391,8 @@ class Game:
             self.matrix.append([])
         for i in range(8).__reversed__():
             for j in range(8):
-                if (piece := self.gameboard[j, i]) is not None:
+                piece = self.gameboard[j, i]
+                if piece is not None:
                     if piece.get_type() != 'E' and piece.get_type() != 'e':
                         self.matrix[i].append(piece.get_type())
                     else:
@@ -423,7 +424,8 @@ class Game:
         for i in range(8).__reversed__():
             x = ''
             for j in range(8):
-                if (piece := self.gameboard[j, i]) is not None:
+                piece = self.gameboard[j, i]
+                if piece is not None:
                     x += ' ' + piece.get_type() + ' '
                 else:
                     x += ' - '
@@ -442,7 +444,8 @@ class Game:
         if not color:
             for i in range(8):
                 for j in range(8):
-                    if (piece := gameboard[(i,j)]) is not None:
+                    piece = gameboard[(i,j)]
+                    if piece is not None:
                         tipo1 = piece.get_type()
                         if tipo1 == 'Q':
                             regine.append(((i,j), piece))
@@ -531,7 +534,8 @@ class Game:
         else:
             for i in range(8):
                 for j in range(8):
-                    if (piece := gameboard[(i,j)]) is not None:
+                    piece = gameboard[(i,j)]
+                    if piece is not None:
                         tipo1 = piece.get_type()
                         if tipo1 == 'q':
                             regine.append(((i,j), piece))
@@ -708,7 +712,8 @@ class Game:
         pedine_bianche = []
         for i in range(8):
             for j in range(8):
-                if (piece := self.gameboard[(i,j)]) is not None:
+                piece = self.gameboard[(i,j)]
+                if piece is not None:
                     if not piece.get_color():
                         pedine_bianche.append(((i,j),piece))
                     else:
@@ -818,7 +823,8 @@ def print_scacchiera(gameboard):
     for i in range(8).__reversed__():
         x = ''
         for j in range(8):
-            if (piece := gameboard[j, i]) is not None:
+            piece = gameboard[j, i]
+            if piece is not None:
                 x += ' ' + piece.get_type() + ' '
             else:
                 x += ' - '
@@ -836,7 +842,8 @@ def check_mate(pos, game, check):
     check1 = False
     for i in range(8):
         for j in range(8):
-            if (piece := game.gameboard[(i,j)]) is not None:
+            piece = game.gameboard[(i,j)]
+            if piece is not None:
                 if not piece.get_color():
                     pedine_bianche.append(((i,j),piece))
                 else:
@@ -892,7 +899,8 @@ def check_check(color, gameboard, game):
     pos_not_avaiable = []
     for i in range(8):
         for j in range(8):
-            if (piece := gameboard[(i,j)]) is not None:
+            piece = gameboard[(i,j)]
+            if piece is not None:
                 if not piece.get_color():
                     game.pedine_bianche.append(((i,j),piece))
                     if piece.get_type() == 'K':

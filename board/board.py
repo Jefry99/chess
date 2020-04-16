@@ -9,9 +9,47 @@ import sys
 import time
 import csv
 
+from ai_non_nostra.config import Config
+from ai_non_nostra.model_chess import ChessModel
+
+# QUESTO E' IL CODICE MODIFICATO AL FINE DI INTRODURRE UNA AI DI CREAZIONE NON NOSTRA ALL'INTERNO DEL CODICE
+
 matrice1 = [['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'], ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['-', '-', '-', '-', '-', '-', '-', '-'], ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'], ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']]
 pezzi = {'R':'WhiteRook', 'N':'WhiteKnight', 'B':'WhiteBishop', 'Q':'WhiteQueen', 'K':'WhiteKing', 'P':'WhitePawn', 'r':'BlackRook', 'n':'BlackKnight', 'b':'BlackBishop', 'q':'BlackQueen', 'k':'BlackKing', 'p':'BlackPawn'}
 BACKGROUND = '#909090'
+
+class SelfPlayWorker:
+    """
+    Worker which trains a chess model using self play data. ALl it does is do self play and then write the
+    game data to file, to be trained on by the optimize worker.
+
+    Attributes:
+        :ivar Config config: config to use to configure this worker
+        :ivar ChessModel current_model: model to use for self play
+        :ivar Manager m: the manager to use to coordinate between other workers
+        :ivar list(Connection) cur_pipes: pipes to send observations to and get back mode predictions.
+        :ivar list((str,list(float))): list of all the moves. Each tuple has the observation in FEN format and
+            then the list of prior probabilities for each action, given by the visit count of each of the states
+            reached by the action (actions indexed according to how they are ordered in the uci move list).
+    """
+    def __init__(self, config: Config):
+        self.config = config
+        self.current_model = self.load_model()
+
+    def load_model(self):
+        """
+        Load the current best model
+        :return ChessModel: current best model
+        """
+        model = ChessModel(self.config)
+        model.build()
+        return model
+
+class Worker:
+    def __init__(self):
+        sys.setrecursionlimit(10000)
+        self.config = Config()
+        self.model = SelfPlayWorker(self.config)
 
 class Timer(object):
     def __init__(self, time, increase, color, label, scacchiera):
@@ -68,7 +106,7 @@ class DisplayMove(object):
         del self
 
 class CreateCanvasObject(object):
-    def __init__(self, canvas, image_name, xpos, ypos, scacchiera, tipo):
+    def __init__(self, canvas, image_name, xpos, ypos, scacchiera, tipo, player):
         self.canvas = canvas
         self.scacchiera = scacchiera
         self.image_name = image_name
@@ -77,11 +115,13 @@ class CreateCanvasObject(object):
         self.pos = None
         self.to = None
         self.tipo = tipo
+        self.player = player
         self.tk_image = tk.PhotoImage(file="{}".format(image_name))
         self.image_obj= canvas.create_image(xpos, ypos, image=self.tk_image)
-        canvas.tag_bind(self.image_obj, '<ButtonPress-1>', self.start)
-        canvas.tag_bind(self.image_obj, '<Button1-Motion>', self.move)
-        canvas.tag_bind(self.image_obj, '<ButtonRelease-1>', self.release)
+        if self.player != 'ai':
+            canvas.tag_bind(self.image_obj, '<ButtonPress-1>', self.start)
+            canvas.tag_bind(self.image_obj, '<Button1-Motion>', self.move)
+            canvas.tag_bind(self.image_obj, '<ButtonRelease-1>', self.release)
         self.move_flag = False
 
     def rimuovi(self):
@@ -112,7 +152,8 @@ class CreateCanvasObject(object):
         if event.x > 0 and event.y > 0 and event.x < 556 and event.y < 556:
             gameboard = copy.deepcopy(self.scacchiera.game.gameboard)
             self.to = (int(event.x/70), 7-int(event.y/70))
-            if (var := self.scacchiera.game.check_move(self.pos, self.to)) == 1:
+            var = self.scacchiera.game.check_move(self.pos, self.to)
+            if var == 1:
                 if self.scacchiera.num_mosse > 0:
                     self.scacchiera.flip_timer()
                 try:
@@ -166,7 +207,7 @@ class CreateCanvasObject(object):
                     else:
                         self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_w_K[0]), 35+70*(7-self.scacchiera.game.pos_w_K[1]), self)
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
-                a = CreateCanvasObject(self.canvas, 'png/{}.png'.format(pezzi[self.scacchiera.promozione]), 35+70*self.to[0], 35+70*(7-self.to[1]), self.scacchiera, self.tipo)
+                a = CreateCanvasObject(self.canvas, 'png/{}.png'.format(pezzi[self.scacchiera.promozione]), 35+70*self.to[0], 35+70*(7-self.to[1]), self.scacchiera, self.tipo, self.player)
                 self.scacchiera.pezzi.append(a)
                 self.scacchiera.running_timer.start()
                 self.scacchiera.delete_trackers()
@@ -215,14 +256,14 @@ class CreateCanvasObject(object):
                 self.scacchiera.rematch()
                 self.rimuovi()
             else:
-                a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera, self.tipo)
+                a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera, self.tipo, self.player)
                 self.scacchiera.pezzi.append(a)
                 self.rimuovi()
             #self.canvas.itemconfig(self.canvas.find_withtag('ciao0', fill='blue')
             #print(self.canvas.find_withtag('ciao{}'.format(quadro)))
             #print(self.canvas.coords(self.canvas.find_withtag('ciao1')))
         else:
-            a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera, self.tipo)
+            a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera, self.tipo, self.player)
             self.scacchiera.pezzi.append(a)
             self.rimuovi()
 
@@ -260,6 +301,7 @@ class Scacchiera(Frame):
         self.text_area = None
         self.num_mosse = 0
         self.num_mosse_da_scrivere = 0
+        self.worker = None
         self.make_home()
 
     def rematch(self):
@@ -486,9 +528,8 @@ class Scacchiera(Frame):
         self.home.quit()
 
     def coming_soon(self):
-        if self.label: 
-            Label(self.frame5, text='COMING SOON!', pady=30, bg=BACKGROUND, font=('Helvetica', 40)).grid(row=3, column=0)
-            self.label = False
+        self.make_scacchiera_mod()
+        self.home.withdraw()
 
     def nuova_partita(self):
         self.make_scacchiera()
@@ -576,9 +617,13 @@ class Scacchiera(Frame):
         self.pulisci_scacchiera()
         for i in range(8):
             for j in range(8):
-                if (coso := matrix[i][7-j]) != '-':
+                coso = matrix[i][7-j]
+                if coso != '-':
                     path = 'png/' + pezzi[coso] + '.png'
-                    a = CreateCanvasObject(self.canvas, path, 35+70*(7-j), 35+70*(7-i), self, coso)
+                    if coso in 'RNBQKP':
+                        a = CreateCanvasObject(self.canvas, path, 35+70*(7-j), 35+70*(7-i), self, coso, 'player')
+                    else:
+                        a = CreateCanvasObject(self.canvas, path, 35+70*(7-j), 35+70*(7-i), self, coso, 'ai')
                     self.pezzi.append(a)
     
     def make(self):
@@ -702,6 +747,147 @@ class Scacchiera(Frame):
         ll.grid(row=1, column=13)
         self.score_cells.append(ll)
         self.load_score()
+
+    # CODICE PROVVISORIO E COSTRUITO SOLO PER L'IMPLEMENTAZIONE DI UNA AI PROVVISORIA
+    def make_scacchiera_mod(self):
+        self.window = tk.Toplevel(self.home)
+        self.window.protocol("WM_DELETE_WINDOW", self.staccah)
+        self.window.geometry("{0}x{1}+0+0".format(self.window.winfo_screenwidth(), self.window.winfo_screenheight()))
+        self.window.title('Chess by Jefry and Layneeeee')
+        self.window.configure(bg = BACKGROUND, padx=(self.window.winfo_screenwidth()-1050)/2, pady=(self.window.winfo_screenheight()-700)/2)
+        #self.window.resizable(False, False)
+        self.frame2 = Frame(self.window, bg=BACKGROUND, padx=10, height = self.tileSize*8, width = 50)
+        self.frame3 = Frame(self.window, bg = BACKGROUND, pady = 10, width = self.tileSize*8, height = 50)
+        self.frame4 = Frame(self.window, bg=BACKGROUND, pady=25)
+        self.frame7 = Frame(self.window, bg=BACKGROUND, padx=70)
+        self.canvas = Canvas(self.window, width=556, height=556, bg='#edd9b9', highlightbackground="light grey")
+        self.canvas.grid(row=0, column=0)
+        self.make_for_ai()
+        self.game = Game()
+        self.put_piece(self.game.make_matrix())
+
+    def make_for_ai(self):
+        self.frame2.grid(row=0, column=1)
+        self.frame3.grid(row=1, column=0)
+        if self.developer_mode:
+            self.frame4.grid(row=2, column=0)
+        self.frame7.grid(row=0, column=2, rowspan=2)
+        cont = 0
+        num = 0
+        for n in range(1, 9):
+            c = 0
+            if n%2==0:
+                for i in range(1, 9):
+                    if c % 2 == 0:
+                        self.canvas.create_rectangle(0+(i-1)*70, 0+(n-1)*70, 70+(i-1)*70, 70+(n-1)*70, fill='#edd9b9', outline='light grey', tags='ciao{}'.format(num))
+                    else:
+                        self.canvas.create_rectangle(0+(i-1)*70, 0+(n-1)*70, 70+(i-1)*70, 70+(n-1)*70, fill='#af8969', outline='light grey', tags='ciao{}'.format(num))
+                    c += 1
+                    num += 1
+            else:
+                for i in range(1, 9):
+                    if c % 2 == 0:
+                        self.canvas.create_rectangle(0+(i-1)*70, 0+(n-1)*70, 70+(i-1)*70, 70+(n-1)*70, fill='#af8969', outline='light grey', tags='ciao{}'.format(num))
+                    else:
+                        self.canvas.create_rectangle(0+(i-1)*70, 0+(n-1)*70, 70+(i-1)*70, 70+(n-1)*70, fill='#edd9b9', outline='light grey', tags='ciao{}'.format(num))
+                    c += 1
+                    num += 1
+            cont += 1
+        fontSize = 20
+        self.frame2.pack_propagate(0)
+        self.frame3.pack_propagate(0)
+        l1 = Label(self.frame3, text='A', bg=BACKGROUND, font=('Helvetica', fontSize))
+        l2 = Label(self.frame3, text='B', bg=BACKGROUND, font=('Helvetica', fontSize))
+        l3 = Label(self.frame3, text='C', bg=BACKGROUND, font=('Helvetica', fontSize))
+        l4 = Label(self.frame3, text='D', bg=BACKGROUND, font=('Helvetica', fontSize))
+        l5 = Label(self.frame3, text='E', bg=BACKGROUND, font=('Helvetica', fontSize))
+        l6 = Label(self.frame3, text='F', bg=BACKGROUND, font=('Helvetica', fontSize))
+        l7 = Label(self.frame3, text='G', bg=BACKGROUND, font=('Helvetica', fontSize))
+        l8 = Label(self.frame3, text='H', bg=BACKGROUND, font=('Helvetica', fontSize))
+        l1.pack(side = LEFT, fill = BOTH, expand = True)
+        l2.pack(side = LEFT, fill = BOTH, expand = True)
+        l3.pack(side = LEFT, fill = BOTH, expand = True)
+        l4.pack(side = LEFT, fill = BOTH, expand = True)
+        l5.pack(side = LEFT, fill = BOTH, expand = True)
+        l6.pack(side = LEFT, fill = BOTH, expand = True)
+        l7.pack(side = LEFT, fill = BOTH, expand = True)
+        l8.pack(side = LEFT, fill = BOTH, expand = True)
+        h1 = Label(self.frame2, text='8', bg=BACKGROUND, font=('Helvetica', fontSize))
+        h2 = Label(self.frame2, text='7', bg=BACKGROUND, font=('Helvetica', fontSize))
+        h3 = Label(self.frame2, text='6', bg=BACKGROUND, font=('Helvetica', fontSize))
+        h4 = Label(self.frame2, text='5', bg=BACKGROUND, font=('Helvetica', fontSize))
+        h5 = Label(self.frame2, text='4', bg=BACKGROUND, font=('Helvetica', fontSize))
+        h6 = Label(self.frame2, text='3', bg=BACKGROUND, font=('Helvetica', fontSize))
+        h7 = Label(self.frame2, text='2', bg=BACKGROUND, font=('Helvetica', fontSize))
+        h8 = Label(self.frame2, text='1', bg=BACKGROUND, font=('Helvetica', fontSize))
+        h1.pack(fill = BOTH, expand = True)
+        h2.pack(fill = BOTH, expand = True)
+        h3.pack(fill = BOTH, expand = True)
+        h4.pack(fill = BOTH, expand = True)
+        h5.pack(fill = BOTH, expand = True)
+        h6.pack(fill = BOTH, expand = True)
+        h7.pack(fill = BOTH, expand = True)
+        h8.pack(fill = BOTH, expand = True)
+        if self.developer_mode:
+            Button(self.frame4, text='RESET', font=('Helvetica', 20), command=self.reset_all, padx=20).grid(row=0, column=0)
+            Frame(self.frame4, bg=BACKGROUND, width=100).grid(row=0, column=1)
+            Button(self.frame4, text='UNDO', font=('Helvetica', 20), command=self.undo, padx=20).grid(row=0, column=2)
+        #frame7
+        Label(self.frame7, text='Player 2', bg=BACKGROUND, font=('Helvetica', 20), width=10, anchor='w').grid(row=0, column=0, pady=(60,0))
+        b_timer = Label(self.frame7, text='', font=('Helvetica', 20), bg=BACKGROUND)
+        self.black_timer = Timer(20, 0, 1, b_timer, self)
+        b_timer.grid(row=0, column=1, pady=(60,0))
+        Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=0, column=2, pady=(60,0))
+        b1 = Button(self.frame7, text='1/2', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=1: self.stall(x, b1)), width=2, height=1, highlightthickness = 0)
+        b1.grid(row=0, column=4, pady=(60,0))
+        b2 = Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=1: self.give_up(x)), width=2, height=1, highlightthickness = 0)
+        b2.grid(row=0, column=5, pady=(60,0))
+        self.text_area = Text(self.frame7, bg=BACKGROUND, state='disabled', font=('Helvetica', 20), width=30, height=10, pady=20)
+        self.text_area.grid(row=1, column=0, columnspan=6)
+        Label(self.frame7, text='Player 1', bg=BACKGROUND, font=('Helvetica', 20), width=10, anchor='w').grid(row=2, column=0)
+        w_timer = Label(self.frame7, text='', font=('Helvetica', 20), bg=BACKGROUND)
+        self.white_timer = Timer(20, 0, 0, w_timer, self)
+        w_timer.grid(row=2, column=1)
+        Frame(self.frame7, bg=BACKGROUND, width=60).grid(row=2, column=2)
+        b3 = Button(self.frame7, text='1/2', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=0: self.stall(x, b3)), width=2, height=1, highlightthickness = 0)
+        b3.grid(row=2, column=4)
+        b4 = Button(self.frame7, text='\u2690', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=0: self.give_up(x)), width=2, height=1, highlightthickness = 0)
+        b4.grid(row=2, column=5)
+        b5 = Button(self.frame7, text='<-', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=1: self.undo_request(x)), width=2, height=1, highlightthickness = 0)
+        b5.grid(row=0, column=3, pady=(60,0))
+        b6 = Button(self.frame7, text='<-', font=('Helvetica', 20), bg=BACKGROUND, command=(lambda x=0: self.undo_request(x)), width=2, height=1, highlightthickness = 0)
+        b6.grid(row=2, column=3)
+        b7 = Button(self.frame7, text='x', fg='red', font=('Helvetica', 18), bg=BACKGROUND, command=None, width=2, height=1, highlightthickness = 0)
+        self.rematch_button = Button(self.frame7, text='REMATCH', font=('Helvetica', 20), bg=BACKGROUND, command=self.reset_all, width=9, height=1, highlightthickness = 0)
+        self.button.append(b1)
+        self.button.append(b2)
+        self.button.append(b3)
+        self.button.append(b4)
+        self.button.append(b5)
+        self.button.append(b6)
+        self.button.append(b7)
+        self.running_timer = self.white_timer
+        self.score_board = Frame(self.frame7, bg=BACKGROUND, pady=50)
+        self.score_board.grid(row=4, column=0, columnspan=6)
+        ll = Label(self.score_board, text="Player 1", bg=BACKGROUND, anchor='center', borderwidth=1, relief='raised')
+        ll.grid(row=0, column=0)
+        self.score_cells.append(ll)
+        ll = Label(self.score_board, text="Player 2", bg=BACKGROUND, anchor='center', borderwidth=1, relief='raised')
+        ll.grid(row=1, column=0)
+        self.score_cells.append(ll)
+        for i in range(2):
+            for j in range(12):
+                ll = Label(self.score_board, text="0", width=2, bg=BACKGROUND, anchor='center', borderwidth=1, relief='raised')
+                ll.grid(row=i, column=j+1)
+                self.score_cells.append(ll)
+        ll = Label(self.score_board, text="", bg=BACKGROUND, width=3, anchor='center', borderwidth=1, relief='raised')
+        ll.grid(row=0, column=13)
+        self.score_cells.append(ll)
+        ll = Label(self.score_board, text="", bg=BACKGROUND, width=3, anchor='center', borderwidth=1, relief='raised')
+        ll.grid(row=1, column=13)
+        self.score_cells.append(ll)
+        self.load_score()
+        self.worker = Worker()
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
