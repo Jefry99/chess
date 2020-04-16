@@ -5,7 +5,16 @@ import numpy as np
 #BLACK = 1
 dizionario = {"A": 0, "a": 0, "B": 1, "b": 1, "C": 2, "c": 2, "D": 3, "d": 3, "E": 4, "e": 4, "F": 5, "f": 5, "G": 6, "g": 6, "H": 7, "h": 7}
 lettere = {0:'a', 1:'b', 2:'c', 3:'d', 4:'e', 5:'f', 6:'g', 7:'h'}
-
+switcher = {
+        'a': 0,
+        'b': 1,
+        'c': 2, 
+        'd': 3,
+        'e': 4,
+        'f': 5,
+        'g': 6,
+        'h': 7
+    }
 pieces_order = 'KQRBNPkqrbnp' # 12x8x8
 castling_order = 'KQkq'       # 4x8x8
 # fifty-move-rule             # 1x8x8
@@ -693,6 +702,39 @@ class Game:
         fen += str(self.fifty_move_draw) + ' '
         return fen
 
+    def return_avaiable_moves(self, color):
+        da_ritornare = []
+        pedine_nere = []
+        pedine_bianche = []
+        for i in range(8):
+            for j in range(8):
+                if (piece := self.gameboard[(i,j)]) is not None:
+                    if not piece.get_color():
+                        pedine_bianche.append(((i,j),piece))
+                    else:
+                        pedine_nere.append(((i,j),piece))
+        if not color:
+            for pezzo in pedine_bianche:
+                pezzo[1].find_valid_moves(pezzo[0], self.gameboard)
+                for mossa in pezzo[1].avaiable_moves:
+                    mod_gameboard = copy.deepcopy(self.gameboard)
+                    del mod_gameboard[pezzo[0]]
+                    mod_gameboard[pezzo[0]] = None
+                    mod_gameboard[mossa] = pezzo[1]
+                    if not check_check((not pezzo[1].get_color()), mod_gameboard, self):
+                        da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1))
+        else:
+            for pezzo in pedine_nere:
+                pezzo[1].find_valid_moves(pezzo[0], self.gameboard)
+                for mossa in pezzo[1].avaiable_moves:
+                    mod_gameboard = copy.deepcopy(self.gameboard)
+                    del mod_gameboard[pezzo[0]]
+                    mod_gameboard[pezzo[0]] = None
+                    mod_gameboard[mossa] = pezzo[1]
+                    if not check_check((not pezzo[1].get_color()), mod_gameboard, self):
+                        da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1))
+        return da_ritornare
+
     def return_target_moves(self, x, y):
         da_ritornare = []
         pezzo = self.gameboard[(x,y)]
@@ -1075,16 +1117,6 @@ def ai_move(move):
     row1 = move[1]
     col2 = move[2]
     row2 = move[3]
-    switcher = {
-        'a': 0,
-        'b': 1,
-        'c': 2, 
-        'd': 3,
-        'e': 4,
-        'f': 5,
-        'g': 6,
-        'h': 7
-    }
     c1 = switcher.get(col1)
     c2 = switcher.get(col2)
     return((c1, int(row1)-1), (c2, int(row2)-1))

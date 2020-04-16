@@ -137,12 +137,15 @@ class CreateCanvasObject(object):
                 self.scacchiera.text_area['state'] = 'normal'
                 self.scacchiera.text_area.insert(INSERT, text)
                 self.scacchiera.text_area['state'] = 'disabled'
+                '''
                 fen = self.scacchiera.game.return_fen()
                 print(fen)
                 matrici = cnn_input(fen)
                 for matrice in matrici:
                     print(matrice)
                     print()
+                print(self.scacchiera.game.return_avaiable_moves(1))
+                '''
                 self.rimuovi()
                 #CreateCanvasObject(self.canvas, self.image_name, 35+70*(quadro[0]), 35+70*(quadro[1]), self.scacchiera)
                 #self.canvas.delete(self.image_obj)
