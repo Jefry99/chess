@@ -65,8 +65,7 @@ class ChessModelAPI:
                     result_pipes.append(pipe)
             
             data = np.asarray(data, dtype=np.float32)
-            print(data)
+            self.agent_model.model._make_predict_function()
             policy_ary, value_ary = self.agent_model.model.predict_on_batch(data)
-            print('worker')
             for pipe, p, v in zip(result_pipes, policy_ary, value_ary):
                 pipe.send((p, float(v)))

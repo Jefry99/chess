@@ -1140,10 +1140,14 @@ def make_matrici_pezzi(fen):
     return pieces_both
 
 def ai_move(move):
-    col1 = move[0]
-    row1 = move[1]
-    col2 = move[2]
-    row2 = move[3]
+    try:
+        col1 = move[0]
+        row1 = move[1]
+        col2 = move[2]
+        row2 = move[3]
+    except:
+        print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+        print(move)
     c1 = switcher.get(col1)
     c2 = switcher.get(col2)
     return((c1, int(row1)-1), (c2, int(row2)-1))
