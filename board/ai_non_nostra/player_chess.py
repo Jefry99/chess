@@ -335,10 +335,18 @@ class ChessPlayer:
         """calc π(a|s0)
         :return list(float): a list of probabilities of taking each action, calculated based on visit counts.
         """
+        print()
+        print()
+        print()
+        print('entro nelle policy')
+        print()
+        print()
+        print()
         state = state_key(env)
         my_visitstats = self.tree[state]
         policy = np.zeros(self.labels_n)
         for action, a_s in my_visitstats.a.items():
+            print(a_s)
             policy[self.move_lookup[action]] = a_s.n
 
         policy /= np.sum(policy)

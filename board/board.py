@@ -902,7 +902,7 @@ class Scacchiera(Frame):
         self.score_cells.append(ll)
         self.load_score()
         self.worker = Worker()
-        self.ai = ChessPlayer(self.worker.config, pipes=self.worker.model.cur_pipes, model=self.worker.model.current_model.model)
+        self.ai = ChessPlayer(self.worker.config, pipes=self.worker.model.cur_pipes)
 
     def ai_move(self):
         if self.game.player_turn:
