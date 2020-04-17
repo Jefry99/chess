@@ -8,6 +8,8 @@ import copy
 import sys
 import time
 import csv
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from ai_non_nostra.config import Config
 from ai_non_nostra.model_chess import ChessModel
@@ -264,8 +266,8 @@ class CreateCanvasObject(object):
                 a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera, self.tipo, self.player)
                 self.scacchiera.pezzi.append(a)
                 self.rimuovi()
-
-            self.scacchiera.ai_move()
+            if self.scacchiera.worker != None:
+                self.scacchiera.ai_move()
             #self.canvas.itemconfig(self.canvas.find_withtag('ciao0', fill='blue')
             #print(self.canvas.find_withtag('ciao{}'.format(quadro)))
             #print(self.canvas.coords(self.canvas.find_withtag('ciao1')))
@@ -631,7 +633,10 @@ class Scacchiera(Frame):
                     if coso in 'RNBQKP':
                         a = CreateCanvasObject(self.canvas, path, 35+70*(7-j), 35+70*(7-i), self, coso, 'player')
                     else:
-                        a = CreateCanvasObject(self.canvas, path, 35+70*(7-j), 35+70*(7-i), self, coso, 'ai')
+                        if self.worker != None:
+                            a = CreateCanvasObject(self.canvas, path, 35+70*(7-j), 35+70*(7-i), self, coso, 'ai')
+                        else:
+                            a = CreateCanvasObject(self.canvas, path, 35+70*(7-j), 35+70*(7-i), self, coso, 'player')
                     self.pezzi.append(a)
     
     def make(self):
@@ -897,7 +902,7 @@ class Scacchiera(Frame):
         self.score_cells.append(ll)
         self.load_score()
         self.worker = Worker()
-        self.ai = ChessPlayer(self.worker.config, pipes=self.worker.model.cur_pipes)
+        self.ai = ChessPlayer(self.worker.config, pipes=self.worker.model.cur_pipes, model=self.worker.model.current_model.model)
 
     def ai_move(self):
         if self.game.player_turn:
