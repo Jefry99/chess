@@ -200,7 +200,7 @@ class ChessPlayer:
 
             # SELECT STEP
             action_t = self.select_action_q_and_u(env, is_root_node)
-            action_t = ai_move(action_t)
+            action = ai_move(action_t)
 
             virtual_loss = self.play_config.virtual_loss
 
@@ -212,7 +212,7 @@ class ChessPlayer:
             my_stats.w += -virtual_loss
             my_stats.q = my_stats.w / my_stats.n
 
-        env.check_move(action_t[0], action_t[1])
+        env.check_move(action[0], action[1])
         #env.step(action_t.uci())----------------------------------------------------------------------------------------------------
         leaf_v = self.search_my_move(env)  # next move from enemy POV
         leaf_v = -leaf_v
@@ -335,18 +335,10 @@ class ChessPlayer:
         """calc π(a|s0)
         :return list(float): a list of probabilities of taking each action, calculated based on visit counts.
         """
-        print()
-        print()
-        print()
-        print('entro nelle policy')
-        print()
-        print()
-        print()
         state = state_key(env)
         my_visitstats = self.tree[state]
         policy = np.zeros(self.labels_n)
         for action, a_s in my_visitstats.a.items():
-            print(a_s)
             policy[self.move_lookup[action]] = a_s.n
 
         policy /= np.sum(policy)
@@ -389,3 +381,12 @@ def state_key(env: Game) -> str:
     """
     fen = env.return_fen().rsplit(' ', 1) # drop the move clock
     return fen[0]
+
+def crea_label(mossa):
+    if type(mossa) == str:
+        return mossa
+    else:
+        lettere = {0:'a', 1:'b', 2:'c', 3:'d', 4:'e', 5:'f', 6:'g', 7:'h'}
+        a = lettere[mossa[0][0]]
+        b = lettere[mossa[1][0]]
+        return a + str(mossa[0][1] + 1) + b + str(mossa[1][1] + 1)

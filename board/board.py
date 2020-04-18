@@ -227,7 +227,6 @@ class CreateCanvasObject(object):
                 text += return_notation(self.tipo, (self.start_x,self.start_y), self.to, self.scacchiera.game, gameboard, promotion=self.scacchiera.promozione)
                 self.scacchiera.text_area['state'] = 'normal'
                 self.scacchiera.text_area.insert(INSERT, text)
-                print('aaaa')
                 self.scacchiera.text_area['state'] = 'disabled'
                 self.rimuovi()
             elif str(var) in '456':
@@ -267,6 +266,7 @@ class CreateCanvasObject(object):
                 self.scacchiera.pezzi.append(a)
                 self.rimuovi()
             if self.scacchiera.worker != None:
+                self.canvas.update()
                 self.scacchiera.ai_move()
             #self.canvas.itemconfig(self.canvas.find_withtag('ciao0', fill='blue')
             #print(self.canvas.find_withtag('ciao{}'.format(quadro)))
@@ -778,7 +778,6 @@ class Scacchiera(Frame):
         self.make_for_ai()
         self.game = Game()
         self.put_piece(self.game.make_matrix())
-        self.ai_move()
 
     def make_for_ai(self):
         self.frame2.grid(row=0, column=1)
@@ -907,7 +906,33 @@ class Scacchiera(Frame):
     def ai_move(self):
         if self.game.player_turn:
             mossa = self.ai.action(self.game)
-            print(mossa)
+            mossa = ai_move(mossa)
+            self.game.check_move(mossa[0], mossa[1])
+            self.put_piece(self.game.make_matrix())
+            if self.num_mosse > 0:
+                self.flip_timer()
+            try:
+                self.check_tracker.rimuovi()
+            except:
+                pass
+            if self.game.check:
+                if not self.game.color_check:
+                    self.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.game.pos_b_k[0]), 35+70*(7-self.game.pos_b_k[1]), self)
+                else:
+                    self.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.game.pos_w_K[0]), 35+70*(7-self.game.pos_w_K[1]), self)
+            self.put_piece(self.game.make_matrix())
+            self.running_timer.start()
+            self.delete_trackers()
+            if self.num_mosse % 2 == 0:
+                self.num_mosse_da_scrivere += 1
+                text = '\n  ' + str(self.num_mosse_da_scrivere) + '. '
+            else:
+                text = ' | '
+            self.num_mosse += 1
+            text += return_notation(self.game.gameboard[mossa[1]].get_type(), mossa[0], mossa[1], self.game, self.game.gameboard)
+            self.text_area['state'] = 'normal'
+            self.text_area.insert(INSERT, text)
+            self.text_area['state'] = 'disabled'
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

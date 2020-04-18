@@ -151,7 +151,6 @@ class Game:
                                 self.num_move += 1
                                 return 1
                             else:
-                                print('Arrocco non possibile')
                                 return 0
                         elif self.w_queenside_cast and to == (pos[0]-2,pos[1]):
                             if check_queenside_cast(target.get_color(), copy.deepcopy(self.gameboard), self):
@@ -188,7 +187,6 @@ class Game:
                                 self.num_move += 1
                                 return 1
                             else:
-                                print('Arrocco non possibile')
                                 return 0
                     else:
                         if self.b_kingside_cast and to == (pos[0]+2,pos[1]):
@@ -226,7 +224,6 @@ class Game:
                                 self.num_move += 1
                                 return 1
                             else:
-                                print('Arrocco non possibile')
                                 return 0
                         elif self.b_queenside_cast and to == (pos[0]-2,pos[1]):
                             if check_queenside_cast(target.get_color(), copy.deepcopy(self.gameboard), self):
@@ -263,7 +260,6 @@ class Game:
                                 self.num_move += 1
                                 return 1
                             else:
-                                print('Arrocco non possibile')
                                 return 0
 
                 target.find_valid_moves(pos, self.gameboard)
@@ -280,7 +276,6 @@ class Game:
                             del mod_gameboard[(to[0], to[1]+1)]
                             mod_gameboard[(to[0], to[1]+1)] = None
                     if not check_check((not target.get_color()), mod_gameboard, self):
-                        print('Mossa valida')
                         self.gameboard[pos] = None
                         self.gameboard[to] = target
                         if len(self.en_passant):
@@ -349,13 +344,10 @@ class Game:
                             self.history.append(copy.deepcopy(self.gameboard))
                         return 1
                     else:
-                        print('Non puoi farti scacco da solo')
                         return 0
                 else:
-                    print('Mossa non valida')
                     return 0            
         else:
-            print('Game ended')
             return 0
 
     def after_promotion(self, tipo):
@@ -1140,14 +1132,10 @@ def make_matrici_pezzi(fen):
     return pieces_both
 
 def ai_move(move):
-    try:
-        col1 = move[0]
-        row1 = move[1]
-        col2 = move[2]
-        row2 = move[3]
-    except:
-        print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-        print(move)
+    col1 = move[0]
+    row1 = move[1]
+    col2 = move[2]
+    row2 = move[3]
     c1 = switcher.get(col1)
     c2 = switcher.get(col2)
     return((c1, int(row1)-1), (c2, int(row2)-1))
