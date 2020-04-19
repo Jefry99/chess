@@ -111,7 +111,6 @@ class Game:
             
             if target:
                 if target.get_color() != self.player_turn:
-                    print('Muovi le pedine del tuo colore dio porco')
                     return 0
                 tipo = target.get_type()
                 if ((tipo == 'K' or tipo == 'k') and (not self.check)):
@@ -738,7 +737,11 @@ class Game:
                     mod_gameboard[pezzo[0]] = None
                     mod_gameboard[mossa] = pezzo[1]
                     if not check_check((not pezzo[1].get_color()), mod_gameboard, self):
-                        da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1))
+                        if mossa[1] == 7 and pezzo[1].get_type() == 'P':
+                            for i in 'qrbn':
+                                da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1) + i)
+                        else:
+                            da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1))
         else:
             for pezzo in pedine_nere:
                 pezzo[1].find_valid_moves(pezzo[0], self.gameboard)
@@ -748,7 +751,11 @@ class Game:
                     mod_gameboard[pezzo[0]] = None
                     mod_gameboard[mossa] = pezzo[1]
                     if not check_check((not pezzo[1].get_color()), mod_gameboard, self):
-                        da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1))
+                        if mossa[1] == 1 and pezzo[1].get_type() == 'p':
+                            for i in 'qrbn':
+                                da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1) + i)
+                        else:
+                            da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1))
         return da_ritornare
 
     def return_target_moves(self, x, y):
