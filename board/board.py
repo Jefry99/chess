@@ -14,6 +14,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from ai_non_nostra.config import Config
 from ai_non_nostra.player_chess import ChessPlayer
 from multiprocessing import Manager
+from ai_non_nostra.model_helper import load_best_model_weight
 
 # QUESTO E' IL CODICE MODIFICATO AL FINE DI INTRODURRE UNA AI DI CREAZIONE NON NOSTRA ALL'INTERNO DEL CODICE
 
@@ -49,7 +50,8 @@ class SelfPlayWorker:
         """
         from ai_non_nostra.model_chess import ChessModel
         model = ChessModel(self.config)
-        model.build()
+        if not load_best_model_weight(model):
+            model.build()
         return model
 
 class Worker:
