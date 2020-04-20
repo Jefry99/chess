@@ -291,6 +291,7 @@ class Game:
                             self.en_passant.clear()
                         if tipo == 'P' or tipo == 'p':
                             if(promotion is not None):
+                                self.pos_of_promotion = to
                                 self.after_promotion(promotion)
                             elif check_promotion(target, to, self):
                                 return 2
@@ -352,6 +353,8 @@ class Game:
             return 0
 
     def after_promotion(self, tipo):
+        del self.gameboard[self.pos_of_promotion]
+        self.gameboard[self.pos_of_promotion] = None
         if tipo == 'Q':
             self.gameboard[self.pos_of_promotion] = Queen(0)
         elif tipo == 'R':
@@ -779,7 +782,7 @@ class Game:
                             da_ritornare.append(((2,7), 0))
                 pezzo.find_valid_moves((x,y), self.gameboard)
                 for mossa in pezzo.avaiable_moves:
-                    if self.gameboard[mossa] == None:
+                    if self.gameboard[mossa] == None or self.gameboard[mossa].get_type() in 'Ee':
                         da_ritornare.append((mossa, 0))
                     else:
                         da_ritornare.append((mossa, 1))
@@ -790,7 +793,7 @@ class Game:
                     mod_gameboard[(x,y)] = None
                     mod_gameboard[mossa] = pezzo
                     if not check_check((not pezzo.get_color()), mod_gameboard, self):
-                        if self.gameboard[mossa] == None:
+                        if self.gameboard[mossa] == None or self.gameboard[mossa].get_type() in 'Ee':
                             da_ritornare.append((mossa, 0))
                         else:
                             da_ritornare.append((mossa, 1))

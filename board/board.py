@@ -198,6 +198,9 @@ class CreateCanvasObject(object):
                 print(self.scacchiera.game.return_avaiable_moves(1))
                 '''
                 self.rimuovi()
+                if self.scacchiera.worker != None:
+                    self.canvas.update()
+                    self.scacchiera.ai_move()
                 #CreateCanvasObject(self.canvas, self.image_name, 35+70*(quadro[0]), 35+70*(quadro[1]), self.scacchiera)
                 #self.canvas.delete(self.image_obj)
                 #del self
@@ -232,6 +235,9 @@ class CreateCanvasObject(object):
                 self.scacchiera.text_area.insert(INSERT, text)
                 self.scacchiera.text_area['state'] = 'disabled'
                 self.rimuovi()
+                if self.scacchiera.worker != None:
+                    self.canvas.update()
+                    self.scacchiera.ai_move()
             elif str(var) in '456':
                 self.scacchiera.running_timer.run = False
                 try:
@@ -264,13 +270,13 @@ class CreateCanvasObject(object):
                 self.scacchiera.text_area['state'] = 'disabled'
                 self.scacchiera.rematch()
                 self.rimuovi()
+                if self.scacchiera.worker != None:
+                    self.canvas.update()
+                    self.scacchiera.ai_move()
             else:
                 a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera, self.tipo, self.player)
                 self.scacchiera.pezzi.append(a)
                 self.rimuovi()
-            if self.scacchiera.worker != None:
-                self.canvas.update()
-                self.scacchiera.ai_move()
             #self.canvas.itemconfig(self.canvas.find_withtag('ciao0', fill='blue')
             #print(self.canvas.find_withtag('ciao{}'.format(quadro)))
             #print(self.canvas.coords(self.canvas.find_withtag('ciao1')))
@@ -936,6 +942,9 @@ class Scacchiera(Frame):
             self.text_area['state'] = 'normal'
             self.text_area.insert(INSERT, text)
             self.text_area['state'] = 'disabled'
+            print(self.game.is_game_alive)
+            print(self.game.player_turn)
+            print()
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
