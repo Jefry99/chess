@@ -524,7 +524,7 @@ class Scacchiera(Frame):
             c.bind("<Button-1>", lambda e,x = 'B': self.after_selection(x))
             d = Label(self.frame6, image=self.img[3])
             d.grid(row=0, column=3)
-            d.bind("<Button-1>", lambda e,x = 'K': self.after_selection(x))
+            d.bind("<Button-1>", lambda e,x = 'N': self.after_selection(x))
         else:
             self.img.append(tk.PhotoImage(file='png/BlackQueen.png'))
             self.img.append(tk.PhotoImage(file='png/BlackRook.png'))
@@ -942,9 +942,6 @@ class Scacchiera(Frame):
             self.text_area['state'] = 'normal'
             self.text_area.insert(INSERT, text)
             self.text_area['state'] = 'disabled'
-            print(self.game.is_game_alive)
-            print(self.game.player_turn)
-            print()
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

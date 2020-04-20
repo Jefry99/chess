@@ -267,7 +267,11 @@ class Game:
                     del mod_gameboard[pos]
                     mod_gameboard[pos] = None
                     mod_gameboard[to] = target
-                    if len(self.en_passant) and (tipo == 'P' or tipo == 'p'):
+                    try:
+                        speciale = self.gameboard[to].get_type()
+                    except:
+                        speciale = '\0'
+                    if len(self.en_passant) and (speciale == 'P' or speciale == 'p'):
                         if tipo == 'P':
                             del mod_gameboard[(to[0], to[1]-1)]
                             mod_gameboard[(to[0], to[1]-1)] = None
@@ -278,12 +282,12 @@ class Game:
                         self.gameboard[pos] = None
                         self.gameboard[to] = target
                         if len(self.en_passant):
-                            if tipo == 'P' or tipo == 'p':
+                            if speciale in 'Ee':
                                 if not target.get_color():
-                                    del mod_gameboard[(to[0], to[1]-1)]
+                                    del self.gameboard[(to[0], to[1]-1)]
                                     self.gameboard[(to[0], to[1]-1)] = None
                                 else:
-                                    del mod_gameboard[(to[0], to[1]+1)]
+                                    del self.gameboard[(to[0], to[1]+1)]
                                     self.gameboard[(to[0], to[1]+1)] = None
                             if ((self.gameboard[self.en_passant[0]].get_type() == 'E') or (self.gameboard[self.en_passant[0]].get_type() == 'e')):
                                 del self.gameboard[self.en_passant[0]]
@@ -293,6 +297,7 @@ class Game:
                             if(promotion is not None):
                                 self.pos_of_promotion = to
                                 self.after_promotion(promotion)
+                                return 2
                             elif check_promotion(target, to, self):
                                 return 2
                             check_enpassant(pos, to, self)
@@ -355,22 +360,14 @@ class Game:
     def after_promotion(self, tipo):
         del self.gameboard[self.pos_of_promotion]
         self.gameboard[self.pos_of_promotion] = None
-        if tipo == 'Q':
-            self.gameboard[self.pos_of_promotion] = Queen(0)
-        elif tipo == 'R':
-            self.gameboard[self.pos_of_promotion] = Rook(0)
-        elif tipo == 'K':
-            self.gameboard[self.pos_of_promotion] = Knight(0)
-        elif tipo == 'B':
-            self.gameboard[self.pos_of_promotion] = Bishop(0)
-        elif tipo == 'q':
-            self.gameboard[self.pos_of_promotion] = Queen(1)
-        elif tipo == 'r':
-            self.gameboard[self.pos_of_promotion] = Rook(1)
-        elif tipo == 'k':
-            self.gameboard[self.pos_of_promotion] = Knight(1)
-        elif tipo == 'b':
-            self.gameboard[self.pos_of_promotion] = Bishop(1)
+        if tipo in 'Qq':
+            self.gameboard[self.pos_of_promotion] = Queen(self.player_turn)
+        elif tipo in 'Rr':
+            self.gameboard[self.pos_of_promotion] = Rook(self.player_turn)
+        elif tipo in 'Nn':
+            self.gameboard[self.pos_of_promotion] = Knight(self.player_turn)
+        elif tipo in 'Bb':
+            self.gameboard[self.pos_of_promotion] = Bishop(self.player_turn)
 
         self.draw_threefold_repetition.clear()
         self.draw_threefold_repetition.append(self.make_matrix())
@@ -905,7 +902,7 @@ def check_mate(pos, game, check):
                 check1 = False
                 if check_check(game.color_check, mod_gameboard, game):
                     check1 = True
-                if check1:
+                if not check1:
                     break
             if check1:
                 mate.append(1)

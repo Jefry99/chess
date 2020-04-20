@@ -572,19 +572,3 @@ def check_check(color, gameboard):
             if pos_w_K in pos_not_avaiable or pos_w_K in gameboard[pos_b_k].avaiable_moves:
                 return True
     return False
-
-def print_scacchiera(gameboard):
-    print('\n')
-    for i in range(8).__reversed__():
-        x = ''
-        for j in range(8):
-            piece = gameboard[j, i]
-            if piece is not None:
-                x += ' ' + piece.get_type() + ' '
-            else:
-                x += ' - '
-        x += '   ' + str(i+1)
-        print(x)
-    print('\n')
-    print(' A  B  C  D  E  F  G  H')
-    print('\n')
