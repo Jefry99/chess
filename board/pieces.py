@@ -194,7 +194,7 @@ class Queen:
         posx = pos[0] + 1
         posy = pos[1] + 1
         while posx < 8 and posy < 8:
-            if board[(posx,posy)]:
+            if board[(posx,posy)] and board[(posx,posy)].get_type() not in 'Ee':
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
                     break
@@ -208,7 +208,7 @@ class Queen:
         posx = pos[0] - 1
         posy = pos[1] + 1
         while posx >= 0 and posy < 8:
-            if board[(posx,posy)]:
+            if board[(posx,posy)] and board[(posx,posy)].get_type() not in 'Ee':
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
                     break
@@ -222,7 +222,7 @@ class Queen:
         posx = pos[0] - 1
         posy = pos[1] - 1
         while posx >= 0 and posy >= 0:
-            if board[(posx,posy)]:
+            if board[(posx,posy)] and board[(posx,posy)].get_type() not in 'Ee':
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
                     break
@@ -236,7 +236,7 @@ class Queen:
         posx = pos[0] + 1
         posy = pos[1] - 1
         while posx < 8 and posy >= 0:
-            if board[(posx,posy)]:
+            if board[(posx,posy)] and board[(posx,posy)].get_type() not in 'Ee':
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
                     break
@@ -249,7 +249,7 @@ class Queen:
         #up
         posizione = pos[1] + 1
         while posizione < 8:
-            if board[(pos[0],posizione)]:
+            if board[(pos[0],posizione)] and board[(pos[0],posizione)].get_type() not in 'Ee':
                 if board[(pos[0],posizione)].get_color() != self.get_color():
                     self.avaiable_moves.append((pos[0],posizione))
                     break
@@ -261,7 +261,7 @@ class Queen:
         #down
         posizione = pos[1] - 1
         while posizione >= 0:
-            if board[(pos[0],posizione)]:
+            if board[(pos[0],posizione)] and board[(pos[0],posizione)].get_type() not in 'Ee':
                 if board[(pos[0],posizione)].get_color() != self.get_color():
                     self.avaiable_moves.append((pos[0],posizione))
                     break
@@ -273,7 +273,7 @@ class Queen:
         #right
         posizione = pos[0] + 1
         while posizione < 8:
-            if board[(posizione,pos[1])]:
+            if board[(posizione,pos[1])] and board[(posizione,pos[1])].get_type() not in 'Ee':
                 if board[(posizione,pos[1])].get_color() != self.get_color():
                     self.avaiable_moves.append((posizione,pos[1]))
                     break
@@ -285,7 +285,7 @@ class Queen:
         #left
         posizione = pos[0] - 1
         while posizione >= 0:
-            if board[(posizione,pos[1])]:
+            if board[(posizione,pos[1])] and board[(posizione,pos[1])].get_type() not in 'Ee':
                 if board[(posizione,pos[1])].get_color() != self.get_color():
                     self.avaiable_moves.append((posizione,pos[1]))
                     break
@@ -329,7 +329,7 @@ class Bishop:
         posx = pos[0] + 1
         posy = pos[1] + 1
         while posx < 8 and posy < 8:
-            if board[(posx,posy)]:
+            if board[(posx,posy)] and board[(posx,posy)].get_type() not in 'Ee':
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
                     break
@@ -343,7 +343,7 @@ class Bishop:
         posx = pos[0] - 1
         posy = pos[1] + 1
         while posx >= 0 and posy < 8:
-            if board[(posx,posy)]:
+            if board[(posx,posy)] and board[(posx,posy)].get_type() not in 'Ee':
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
                     break
@@ -357,7 +357,7 @@ class Bishop:
         posx = pos[0] - 1
         posy = pos[1] - 1
         while posx >= 0 and posy >= 0:
-            if board[(posx,posy)]:
+            if board[(posx,posy)] and board[(posx,posy)].get_type() not in 'Ee':
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
                     break
@@ -371,7 +371,7 @@ class Bishop:
         posx = pos[0] + 1
         posy = pos[1] - 1
         while posx < 8 and posy >= 0:
-            if board[(posx,posy)]:
+            if board[(posx,posy)] and board[(posx,posy)].get_type() not in 'Ee':
                 if board[(posx,posy)].get_color() != self.get_color():
                     self.avaiable_moves.append((posx,posy))
                     break
@@ -454,7 +454,7 @@ class Rook:
         #up
         posizione = pos[1] + 1
         while posizione < 8:
-            if board[(pos[0],posizione)]:
+            if board[(pos[0],posizione)] and board[(pos[0],posizione)].get_type() not in 'Ee':
                 if board[(pos[0],posizione)].get_color() != self.get_color():
                     self.avaiable_moves.append((pos[0],posizione))
                     break
@@ -466,7 +466,7 @@ class Rook:
         #down
         posizione = pos[1] - 1
         while posizione >= 0:
-            if board[(pos[0],posizione)]:
+            if board[(pos[0],posizione)] and board[(pos[0],posizione)].get_type() not in 'Ee':
                 if board[(pos[0],posizione)].get_color() != self.get_color():
                     self.avaiable_moves.append((pos[0],posizione))
                     break
@@ -478,7 +478,7 @@ class Rook:
         #right
         posizione = pos[0] + 1
         while posizione < 8:
-            if board[(posizione,pos[1])]:
+            if board[(posizione,pos[1])] and board[(posizione,pos[1])].get_type() not in 'Ee':
                 if board[(posizione,pos[1])].get_color() != self.get_color():
                     self.avaiable_moves.append((posizione,pos[1]))
                     break
@@ -490,7 +490,7 @@ class Rook:
         #left
         posizione = pos[0] - 1
         while posizione >= 0:
-            if board[(posizione,pos[1])]:
+            if board[(posizione,pos[1])] and board[(posizione,pos[1])].get_type() not in 'Ee':
                 if board[(posizione,pos[1])].get_color() != self.get_color():
                     self.avaiable_moves.append((posizione,pos[1]))
                     break

@@ -12,9 +12,9 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from ai_non_nostra.config import Config
-from ai_non_nostra.model_chess import ChessModel
 from ai_non_nostra.player_chess import ChessPlayer
 from multiprocessing import Manager
+from ai_non_nostra.model_helper import load_best_model_weight
 
 # QUESTO E' IL CODICE MODIFICATO AL FINE DI INTRODURRE UNA AI DI CREAZIONE NON NOSTRA ALL'INTERNO DEL CODICE
 
@@ -48,8 +48,10 @@ class SelfPlayWorker:
         Load the current best model
         :return ChessModel: current best model
         """
+        from ai_non_nostra.model_chess import ChessModel
         model = ChessModel(self.config)
-        model.build()
+        if not load_best_model_weight(model):
+            model.build()
         return model
 
 class Worker:
@@ -83,10 +85,11 @@ class Timer(object):
             self.home.after(500, self.start)
     
     def lose(self):
-        self.scacchiera.running_timer.run = False
-        self.scacchiera.game.endgame(self.color)
-        self.scacchiera.update_scores(not self.color)
-        self.scacchiera.rematch()
+        print("Avresti perso, idiota");
+        #self.scacchiera.running_timer.run = False
+        #self.scacchiera.game.endgame(self.color)
+        #self.scacchiera.update_scores(not self.color)
+        #self.scacchiera.rematch()
 
     def reset(self):
         self.min = 20
@@ -195,6 +198,9 @@ class CreateCanvasObject(object):
                 print(self.scacchiera.game.return_avaiable_moves(1))
                 '''
                 self.rimuovi()
+                if self.scacchiera.worker != None:
+                    self.canvas.update()
+                    self.scacchiera.ai_move()
                 #CreateCanvasObject(self.canvas, self.image_name, 35+70*(quadro[0]), 35+70*(quadro[1]), self.scacchiera)
                 #self.canvas.delete(self.image_obj)
                 #del self
@@ -229,6 +235,9 @@ class CreateCanvasObject(object):
                 self.scacchiera.text_area.insert(INSERT, text)
                 self.scacchiera.text_area['state'] = 'disabled'
                 self.rimuovi()
+                if self.scacchiera.worker != None:
+                    self.canvas.update()
+                    self.scacchiera.ai_move()
             elif str(var) in '456':
                 self.scacchiera.running_timer.run = False
                 try:
@@ -261,13 +270,13 @@ class CreateCanvasObject(object):
                 self.scacchiera.text_area['state'] = 'disabled'
                 self.scacchiera.rematch()
                 self.rimuovi()
+                if self.scacchiera.worker != None:
+                    self.canvas.update()
+                    self.scacchiera.ai_move()
             else:
                 a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera, self.tipo, self.player)
                 self.scacchiera.pezzi.append(a)
                 self.rimuovi()
-            if self.scacchiera.worker != None:
-                self.canvas.update()
-                self.scacchiera.ai_move()
             #self.canvas.itemconfig(self.canvas.find_withtag('ciao0', fill='blue')
             #print(self.canvas.find_withtag('ciao{}'.format(quadro)))
             #print(self.canvas.coords(self.canvas.find_withtag('ciao1')))
@@ -515,7 +524,7 @@ class Scacchiera(Frame):
             c.bind("<Button-1>", lambda e,x = 'B': self.after_selection(x))
             d = Label(self.frame6, image=self.img[3])
             d.grid(row=0, column=3)
-            d.bind("<Button-1>", lambda e,x = 'K': self.after_selection(x))
+            d.bind("<Button-1>", lambda e,x = 'N': self.after_selection(x))
         else:
             self.img.append(tk.PhotoImage(file='png/BlackQueen.png'))
             self.img.append(tk.PhotoImage(file='png/BlackRook.png'))
@@ -907,7 +916,7 @@ class Scacchiera(Frame):
         if self.game.player_turn:
             mossa = self.ai.action(self.game)
             mossa = ai_move(mossa)
-            self.game.check_move(mossa[0], mossa[1])
+            self.game.check_move(mossa[0], mossa[1], promotion = mossa[2])
             self.put_piece(self.game.make_matrix())
             if self.num_mosse > 0:
                 self.flip_timer()

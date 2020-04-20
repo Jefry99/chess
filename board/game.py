@@ -92,7 +92,7 @@ class Game:
                 self.player_turn = 1
      
 
-    def check_move(self, pos, to):
+    def check_move(self, pos, to, promotion = None):
         if self.is_game_alive:
             #Salvo la possibilità di fare arrocco per entrambi i giocatori
             self.gameboard[(0,8)] = self.w_kingside_cast
@@ -111,7 +111,6 @@ class Game:
             
             if target:
                 if target.get_color() != self.player_turn:
-                    print('Muovi le pedine del tuo colore dio porco')
                     return 0
                 tipo = target.get_type()
                 if ((tipo == 'K' or tipo == 'k') and (not self.check)):
@@ -268,8 +267,12 @@ class Game:
                     del mod_gameboard[pos]
                     mod_gameboard[pos] = None
                     mod_gameboard[to] = target
-                    if len(self.en_passant) and (tipo == 'P' or tipo == 'p'):
-                        if tipo == 'P':
+                    try:
+                        speciale = self.gameboard[to].get_type()
+                    except:
+                        speciale = '\0'
+                    if len(self.en_passant) and (speciale == 'E' or speciale == 'e'):
+                        if tipo == 'E':
                             del mod_gameboard[(to[0], to[1]-1)]
                             mod_gameboard[(to[0], to[1]-1)] = None
                         else:
@@ -279,19 +282,23 @@ class Game:
                         self.gameboard[pos] = None
                         self.gameboard[to] = target
                         if len(self.en_passant):
-                            if tipo == 'P' or tipo == 'p':
+                            if speciale in 'Ee':
                                 if not target.get_color():
-                                    del mod_gameboard[(to[0], to[1]-1)]
+                                    del self.gameboard[(to[0], to[1]-1)]
                                     self.gameboard[(to[0], to[1]-1)] = None
                                 else:
-                                    del mod_gameboard[(to[0], to[1]+1)]
+                                    del self.gameboard[(to[0], to[1]+1)]
                                     self.gameboard[(to[0], to[1]+1)] = None
                             if ((self.gameboard[self.en_passant[0]].get_type() == 'E') or (self.gameboard[self.en_passant[0]].get_type() == 'e')):
                                 del self.gameboard[self.en_passant[0]]
                                 self.gameboard[self.en_passant[0]] = None
                             self.en_passant.clear()
                         if tipo == 'P' or tipo == 'p':
-                            if check_promotion(target, to, self):
+                            if(promotion is not None):
+                                self.pos_of_promotion = to
+                                self.after_promotion(promotion)
+                                return 2
+                            elif check_promotion(target, to, self):
                                 return 2
                             check_enpassant(pos, to, self)
                             self.draw_threefold_repetition.clear()
@@ -351,22 +358,16 @@ class Game:
             return 0
 
     def after_promotion(self, tipo):
-        if tipo == 'Q':
-            self.gameboard[self.pos_of_promotion] = Queen(0)
-        elif tipo == 'R':
-            self.gameboard[self.pos_of_promotion] = Rook(0)
-        elif tipo == 'K':
-            self.gameboard[self.pos_of_promotion] = Knight(0)
-        elif tipo == 'B':
-            self.gameboard[self.pos_of_promotion] = Bishop(0)
-        elif tipo == 'q':
-            self.gameboard[self.pos_of_promotion] = Queen(1)
-        elif tipo == 'r':
-            self.gameboard[self.pos_of_promotion] = Rook(1)
-        elif tipo == 'k':
-            self.gameboard[self.pos_of_promotion] = Knight(1)
-        elif tipo == 'b':
-            self.gameboard[self.pos_of_promotion] = Bishop(1)
+        del self.gameboard[self.pos_of_promotion]
+        self.gameboard[self.pos_of_promotion] = None
+        if tipo in 'Qq':
+            self.gameboard[self.pos_of_promotion] = Queen(self.player_turn)
+        elif tipo in 'Rr':
+            self.gameboard[self.pos_of_promotion] = Rook(self.player_turn)
+        elif tipo in 'Nn':
+            self.gameboard[self.pos_of_promotion] = Knight(self.player_turn)
+        elif tipo in 'Bb':
+            self.gameboard[self.pos_of_promotion] = Bishop(self.player_turn)
 
         self.draw_threefold_repetition.clear()
         self.draw_threefold_repetition.append(self.make_matrix())
@@ -738,7 +739,11 @@ class Game:
                     mod_gameboard[pezzo[0]] = None
                     mod_gameboard[mossa] = pezzo[1]
                     if not check_check((not pezzo[1].get_color()), mod_gameboard, self):
-                        da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1))
+                        if mossa[1] == 7 and pezzo[1].get_type() == 'P':
+                            for i in 'qrbn':
+                                da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1) + i)
+                        else:
+                            da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1))
         else:
             for pezzo in pedine_nere:
                 pezzo[1].find_valid_moves(pezzo[0], self.gameboard)
@@ -748,7 +753,11 @@ class Game:
                     mod_gameboard[pezzo[0]] = None
                     mod_gameboard[mossa] = pezzo[1]
                     if not check_check((not pezzo[1].get_color()), mod_gameboard, self):
-                        da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1))
+                        if mossa[1] == 0 and pezzo[1].get_type() == 'p':
+                            for i in 'qrbn':
+                                da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1) + i)
+                        else:
+                            da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1))
         return da_ritornare
 
     def return_target_moves(self, x, y):
@@ -770,7 +779,7 @@ class Game:
                             da_ritornare.append(((2,7), 0))
                 pezzo.find_valid_moves((x,y), self.gameboard)
                 for mossa in pezzo.avaiable_moves:
-                    if self.gameboard[mossa] == None:
+                    if self.gameboard[mossa] == None or self.gameboard[mossa].get_type() in 'Ee':
                         da_ritornare.append((mossa, 0))
                     else:
                         da_ritornare.append((mossa, 1))
@@ -781,7 +790,7 @@ class Game:
                     mod_gameboard[(x,y)] = None
                     mod_gameboard[mossa] = pezzo
                     if not check_check((not pezzo.get_color()), mod_gameboard, self):
-                        if self.gameboard[mossa] == None:
+                        if self.gameboard[mossa] == None or self.gameboard[mossa].get_type() in 'Ee':
                             da_ritornare.append((mossa, 0))
                         else:
                             da_ritornare.append((mossa, 1))
@@ -893,7 +902,7 @@ def check_mate(pos, game, check):
                 check1 = False
                 if check_check(game.color_check, mod_gameboard, game):
                     check1 = True
-                if check1:
+                if not check1:
                     break
             if check1:
                 mate.append(1)
@@ -1132,13 +1141,16 @@ def make_matrici_pezzi(fen):
     return pieces_both
 
 def ai_move(move):
+    prom = None
+    if(len(move) == 5):
+        prom = move[4]
     col1 = move[0]
     row1 = move[1]
     col2 = move[2]
     row2 = move[3]
     c1 = switcher.get(col1)
     c2 = switcher.get(col2)
-    return((c1, int(row1)-1), (c2, int(row2)-1))
+    return((c1, int(row1)-1), (c2, int(row2)-1), prom)
 
 def replace_tags(board):
     board = board.split(" ")[0]
