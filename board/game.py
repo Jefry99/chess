@@ -271,8 +271,8 @@ class Game:
                         speciale = self.gameboard[to].get_type()
                     except:
                         speciale = '\0'
-                    if len(self.en_passant) and (speciale == 'P' or speciale == 'p'):
-                        if tipo == 'P':
+                    if len(self.en_passant) and (speciale == 'E' or speciale == 'e'):
+                        if tipo == 'E':
                             del mod_gameboard[(to[0], to[1]-1)]
                             mod_gameboard[(to[0], to[1]-1)] = None
                         else:
