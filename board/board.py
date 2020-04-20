@@ -83,10 +83,11 @@ class Timer(object):
             self.home.after(500, self.start)
     
     def lose(self):
-        self.scacchiera.running_timer.run = False
-        self.scacchiera.game.endgame(self.color)
-        self.scacchiera.update_scores(not self.color)
-        self.scacchiera.rematch()
+        print("Avresti perso, idiota");
+        #self.scacchiera.running_timer.run = False
+        #self.scacchiera.game.endgame(self.color)
+        #self.scacchiera.update_scores(not self.color)
+        #self.scacchiera.rematch()
 
     def reset(self):
         self.min = 20
@@ -907,7 +908,7 @@ class Scacchiera(Frame):
         if self.game.player_turn:
             mossa = self.ai.action(self.game)
             mossa = ai_move(mossa)
-            self.game.check_move(mossa[0], mossa[1])
+            self.game.check_move(mossa[0], mossa[1], promotion = mossa[2])
             self.put_piece(self.game.make_matrix())
             if self.num_mosse > 0:
                 self.flip_timer()

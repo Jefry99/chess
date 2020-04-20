@@ -92,7 +92,7 @@ class Game:
                 self.player_turn = 1
      
 
-    def check_move(self, pos, to):
+    def check_move(self, pos, to, promotion = None):
         if self.is_game_alive:
             #Salvo la possibilità di fare arrocco per entrambi i giocatori
             self.gameboard[(0,8)] = self.w_kingside_cast
@@ -291,7 +291,9 @@ class Game:
                                 self.gameboard[self.en_passant[0]] = None
                             self.en_passant.clear()
                         if tipo == 'P' or tipo == 'p':
-                            if check_promotion(target, to, self):
+                            if(promotion is not None):
+                                after_promotion(promotion)
+                            elif check_promotion(target, to, self):
                                 return 2
                             check_enpassant(pos, to, self)
                             self.draw_threefold_repetition.clear()
@@ -1132,13 +1134,16 @@ def make_matrici_pezzi(fen):
     return pieces_both
 
 def ai_move(move):
+    prom = None
+    if(len(move) == 5):
+        prom = move[4]
     col1 = move[0]
     row1 = move[1]
     col2 = move[2]
     row2 = move[3]
     c1 = switcher.get(col1)
     c2 = switcher.get(col2)
-    return((c1, int(row1)-1), (c2, int(row2)-1))
+    return((c1, int(row1)-1), (c2, int(row2)-1), prom)
 
 def replace_tags(board):
     board = board.split(" ")[0]

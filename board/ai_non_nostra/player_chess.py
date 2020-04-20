@@ -212,7 +212,7 @@ class ChessPlayer:
             my_stats.w += -virtual_loss
             my_stats.q = my_stats.w / my_stats.n
 
-        env.check_move(action[0], action[1])
+        env.check_move(action[0], action[1], action[2])
         #env.step(action_t.uci())----------------------------------------------------------------------------------------------------
         leaf_v = self.search_my_move(env)  # next move from enemy POV
         leaf_v = -leaf_v
