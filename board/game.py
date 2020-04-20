@@ -291,7 +291,7 @@ class Game:
                             self.en_passant.clear()
                         if tipo == 'P' or tipo == 'p':
                             if(promotion is not None):
-                                after_promotion(promotion)
+                                self.after_promotion(promotion)
                             elif check_promotion(target, to, self):
                                 return 2
                             check_enpassant(pos, to, self)
@@ -753,7 +753,7 @@ class Game:
                     mod_gameboard[pezzo[0]] = None
                     mod_gameboard[mossa] = pezzo[1]
                     if not check_check((not pezzo[1].get_color()), mod_gameboard, self):
-                        if mossa[1] == 1 and pezzo[1].get_type() == 'p':
+                        if mossa[1] == 0 and pezzo[1].get_type() == 'p':
                             for i in 'qrbn':
                                 da_ritornare.append(lettere[pezzo[0][0]] + str(pezzo[0][1]+1) + lettere[mossa[0]] + str(mossa[1]+1) + i)
                         else:

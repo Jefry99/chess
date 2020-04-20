@@ -278,7 +278,6 @@ class CreateCanvasObject(object):
             a = CreateCanvasObject(self.canvas, self.image_name, 35+70*self.start_x, 35+70*self.start_y, self.scacchiera, self.tipo, self.player)
             self.scacchiera.pezzi.append(a)
             self.rimuovi()
-        print(self.scacchiera.game.return_avaiable_moves())
 
 class Scacchiera(Frame):
     def __init__(self):
