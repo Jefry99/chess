@@ -27,6 +27,9 @@ class Winner:
     white = 0
     black = 1
 
+# quando si rivede il codice fare una funzione per applicare direttamente una mossa all'env perchè quando gioca una ai questa
+# sceglierà sempre una mossa tra quelle legali, menter il controllo se la mossa scelta segue le regole degli scacchi è da fare
+# solo per gli umani
 class Game:
     
     def __init__(self):
@@ -410,6 +413,18 @@ class Game:
                 else:
                     self.matrix[i].append('-')
         return self.matrix
+
+    def adjudicate(self):
+        score = self.testeval(absolute = True)
+        if abs(score) < 0.01:
+            self.winner = Winner.draw
+        elif score > 0:
+            self.winner = Winner.white
+        else:
+            self.winner = Winner.black
+
+    def testeval(self, absolute=False):
+        return testeval(self.return_fen(), absolute)
 
     def create_board(self):
         for i in range(8):
@@ -956,6 +971,8 @@ def check_stall(color, game):
             piece[1].find_valid_moves(piece[0], game.gameboard)
             if len(piece[1].avaiable_moves) > 0:
                 return
+    if game.fifty_move_draw > 50:
+        return
     print('STALL')
     game.stall()
     return True
@@ -1073,7 +1090,7 @@ def check_queenside_cast(color, gameboard, game):
 
 def cnn_input(fen):
     fen = maybe_reverse_fen(fen, black_turn(fen))
-    return input_cnn(fen) # 18x8x8 matrix
+    return make_cnn_matrix(fen) # 18x8x8 matrix
 
 def black_turn(fen):
     return fen.split(" ")[1] == 'b'
@@ -1094,7 +1111,7 @@ def maybe_reverse_fen(fen, flip = False):
         + " " + "".join(sorted(swapall(foo[2]))) \
         + " " + foo[3] + " " + foo[4] + " " + foo[5]
 
-def input_cnn(fen):
+def make_cnn_matrix(fen):
     matrici_pezzi = make_matrici_pezzi(fen)
     matrici_mosse_speciali = make_matrici_speciali(fen)
     matrici_input = np.vstack((matrici_pezzi, matrici_mosse_speciali))
@@ -1162,6 +1179,26 @@ def replace_tags(board):
     board = board.replace("7", "1111111")
     board = board.replace("8", "11111111")
     return board.replace("/", "")
+
+def testeval(fen, absolute = False) -> float:
+    piece_vals = {'K': 3, 'Q': 14, 'R': 5, 'B': 3.25, 'N': 3, 'P': 1} # somehow it doesn't know how to keep its queen
+    ans = 0.0
+    tot = 0
+    for c in fen.split(' ')[0]:
+        if not c.isalpha():
+            continue
+
+        if c.isupper():
+            ans += piece_vals[c]
+            tot += piece_vals[c]
+        else:
+            ans -= piece_vals[c.upper()]
+            tot += piece_vals[c.upper()]
+    v = ans/tot
+    if not absolute and black_turn(fen):
+        v = -v
+    assert abs(v) < 1
+    return np.tanh(v * 3) # arbitrary
 
 def main():
     game = Game()
