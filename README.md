@@ -19,7 +19,8 @@ Start by running:
 python board.py
 </pre>
 <br>
-To train the nns:
+<h2>To train the nns:</h2><br>
+
 Run self_play to create the batch of game to tran the nns:
 <br>
 <pre>
