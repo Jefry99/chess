@@ -18,23 +18,24 @@ Start by running:
 <pre>
 python board.py
 </pre>
-<br>
-<h2>To train the nns:</h2><br>
 
-Run self_play to create the batch of game to tran the nns:
-<br>
-<pre>
-python self_play.py
-</pre>
-<br>
-And then run the optimizer to update the weights
-<br>
-<pre>
-python optimize.py
-</pre>
 <br>
 For the developers argument <code>-d</code> start directly a game.
 <br>
 <pre>
 python board.py -d
+</pre>
+<br>
+<h2>To train the nns:</h2><br>
+
+Run self_play to create the batch of game to tran the nns:<br>
+<br>
+<pre>
+python self_play.py
+</pre>
+<br>
+And then run the optimizer to update the weights:<br>
+<br>
+<pre>
+python optimize.py
 </pre>
