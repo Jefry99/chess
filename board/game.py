@@ -59,6 +59,7 @@ class Game:
         self.history.append(copy.deepcopy(self.gameboard))
         self.castle_history = []
         self.num_move = 0
+        self.real_num_move = 0
         self.winner = None
 
     def white_to_move(self):
@@ -150,6 +151,7 @@ class Game:
                                     self.player_turn = 0
                                 else:
                                     self.player_turn = 1
+                                    self.real_num_move += 1
                                 self.num_move += 1
                                 return 1
                             else:
@@ -186,6 +188,7 @@ class Game:
                                     self.player_turn = 0
                                 else:
                                     self.player_turn = 1
+                                    self.real_num_move += 1
                                 self.num_move += 1
                                 return 1
                             else:
@@ -223,6 +226,7 @@ class Game:
                                     self.player_turn = 0
                                 else:
                                     self.player_turn = 1
+                                    self.real_num_move += 1
                                 self.num_move += 1
                                 return 1
                             else:
@@ -259,6 +263,7 @@ class Game:
                                     self.player_turn = 0
                                 else:
                                     self.player_turn = 1
+                                    self.real_num_move += 1
                                 self.num_move += 1
                                 return 1
                             else:
@@ -346,6 +351,7 @@ class Game:
                             self.player_turn = 0
                         else:
                             self.player_turn = 1
+                            self.real_num_move += 1
                         self.num_move += 1
                         try:
                             self.history[self.num_move]
@@ -391,6 +397,7 @@ class Game:
             self.player_turn = 0
         else:
             self.player_turn = 1
+            self.real_num_move += 1
         self.num_move += 1
         try:
             self.history[self.num_move]
@@ -728,7 +735,7 @@ class Game:
             fen += '- '
         else:
             fen += lettere[self.en_passant[0][0]] + str(self.en_passant[0][1] + 1) + ' '
-        fen += str(self.fifty_move_draw) + ' '
+        fen += str(self.fifty_move_draw) + ' ' + str(self.real_num_move)
         return fen
 
     def return_avaiable_moves(self, color=None):
@@ -1026,67 +1033,55 @@ def check_stall_threefold_repetition(game):
 
 def check_kingside_cast(color, gameboard, game):
     if not color:
-        if gameboard[(5,0)] == None and gameboard[(6,0)] == None:
-            gameboard[(4,0)] = None
-            gameboard[(5,0)] = King(0)
-            if not check_check(not color, gameboard, game):
-                gameboard[(5,0)] = None
-                gameboard[(6,0)] = King(0)
-                if not check_check(not color, gameboard, game):
-                    return 1
-                else:
-                    return 0
-            else:
-                return 0
-        else:
-            return 0
+        if gameboard[(7,0)] != None:
+            if gameboard[(7,0)].get_type() == 'R':
+                if gameboard[(5,0)] == None and gameboard[(6,0)] == None:
+                    gameboard[(4,0)] = None
+                    gameboard[(5,0)] = King(0)
+                    if not check_check(not color, gameboard, game):
+                        gameboard[(5,0)] = None
+                        gameboard[(6,0)] = King(0)
+                        if not check_check(not color, gameboard, game):
+                            return 1
+        return 0
     else:
-        if gameboard[(5,7)] == None and gameboard[(6,7)] == None:
-            gameboard[(4,7)] = None
-            gameboard[(5,7)] = King(1)
-            if not check_check(not color, gameboard, game):
-                gameboard[(5,7)] = None
-                gameboard[(6,7)] = King(1)
-                if not check_check(not color, gameboard, game):
-                    return 1
-                else:
-                    return 0
-            else:
-                return 0
-        else:
-            return 0
+        if gameboard[(7,7)] != None:
+            if gameboard[(7,7)].get_type() == 'r':
+                if gameboard[(5,7)] == None and gameboard[(6,7)] == None:
+                    gameboard[(4,7)] = None
+                    gameboard[(5,7)] = King(1)
+                    if not check_check(not color, gameboard, game):
+                        gameboard[(5,7)] = None
+                        gameboard[(6,7)] = King(1)
+                        if not check_check(not color, gameboard, game):
+                            return 1
+        return 0
 
 def check_queenside_cast(color, gameboard, game):
     if not color:
-        if gameboard[(3,0)] == None and gameboard[(2,0)] == None and gameboard[(1,0)] == None:
-            gameboard[(4,0)] = None
-            gameboard[(3,0)] = King(0)
-            if not check_check(not color, gameboard, game):
-                gameboard[(3,0)] = None
-                gameboard[(2,0)] = King(0)
-                if not check_check(not color, gameboard, game):
-                    return 1
-                else:
-                    return 0
-            else:
-                return 0
-        else:
-            return 0
+        if gameboard[(0,0)] != None:
+            if gameboard[(0,0)].get_type() == 'R':
+                if gameboard[(3,0)] == None and gameboard[(2,0)] == None and gameboard[(1,0)] == None:
+                    gameboard[(4,0)] = None
+                    gameboard[(3,0)] = King(0)
+                    if not check_check(not color, gameboard, game):
+                        gameboard[(3,0)] = None
+                        gameboard[(2,0)] = King(0)
+                        if not check_check(not color, gameboard, game):
+                            return 1
+        return 0
     else:
-        if gameboard[(3,7)] == None and gameboard[(2,7)] == None and gameboard[(1,7)] == None:
-            gameboard[(4,7)] = None
-            gameboard[(3,7)] = King(1)
-            if not check_check(not color, gameboard, game):
-                gameboard[(3,7)] = None
-                gameboard[(2,7)] = King(1)
-                if not check_check(not color, gameboard, game):
-                    return 1
-                else:
-                    return 0
-            else:
-                return 0
-        else:
-            return 0
+        if gameboard[(0,7)] != None:
+            if gameboard[(0,7)].get_type() == 'r':
+                if gameboard[(3,7)] == None and gameboard[(2,7)] == None and gameboard[(1,7)] == None:
+                    gameboard[(4,7)] = None
+                    gameboard[(3,7)] = King(1)
+                    if not check_check(not color, gameboard, game):
+                        gameboard[(3,7)] = None
+                        gameboard[(2,7)] = King(1)
+                        if not check_check(not color, gameboard, game):
+                            return 1
+        return 0
 
 def cnn_input(fen):
     fen = maybe_reverse_fen(fen, black_turn(fen))
