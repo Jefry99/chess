@@ -49,11 +49,6 @@ class ResourceConfig:
         self.model_best_config_path = os.path.join(self.model_dir, "model_best_config.json")
         self.model_best_weight_path = os.path.join(self.model_dir, "model_best_weight.h5")
 
-        self.model_best_distributed_ftp_server = "alpha-chess-zero.mygamesonline.org"
-        self.model_best_distributed_ftp_user = "2537576_chess"
-        self.model_best_distributed_ftp_password = "alpha-chess-zero-2"
-        self.model_best_distributed_ftp_remote_path = "/alpha-chess-zero.mygamesonline.org/"
-
         self.next_generation_model_dir = os.path.join(self.model_dir, "next_generation")
         self.next_generation_model_dirname_tmpl = "model_%s"
         self.next_generation_model_config_filename = "model_config.json"

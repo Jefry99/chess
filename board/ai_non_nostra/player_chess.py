@@ -10,7 +10,7 @@ from threading import Lock
 import numpy as np
 import copy
 
-from game import Game, Winner, input_cnn, ai_move
+from game import Game, Winner, cnn_input, ai_move
 from ai_non_nostra.config import Config
 
 logger = getLogger(__name__)
@@ -236,7 +236,7 @@ class ChessPlayer:
         This gets a prediction for the policy and value of the state within the given env
         :return (float, float): the policy and value predictions for this state
         """
-        state_planes = input_cnn(env.return_fen())
+        state_planes = cnn_input(env.return_fen())
 
         leaf_p, leaf_v = self.predict(state_planes)
         # these are canonical policy and value (i.e. side to move is "white")

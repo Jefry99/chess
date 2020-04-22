@@ -1,5 +1,6 @@
 .DS_Store
 board/__pycache__/
+board/logs/
 board/ai_non_nostra/__pycache__/
 chess.code-workspace
 board/scores.txt
