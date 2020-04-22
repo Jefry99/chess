@@ -20,7 +20,7 @@ python board.py
 </pre>
 
 <br>
-For the developers argument <code>-d</code> start directly a game.
+For the developers argument <code>-d</code> start directly a game.<br>
 <br>
 <pre>
 python board.py -d
