@@ -18,7 +18,6 @@ Start by running:
 <pre>
 python board.py
 </pre>
-
 <br>
 For the developers argument <code>-d</code> start directly a game.<br>
 <br>
@@ -29,7 +28,7 @@ python board.py -d
 <h2>To train the nns:</h2><br>
 
 Run self_play to create the batch of game to tran the nns:<br>
-<br>
+
 <pre>
 python self_play.py
 </pre>
