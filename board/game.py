@@ -760,6 +760,13 @@ class Game:
                     del mod_gameboard[pezzo[0]]
                     mod_gameboard[pezzo[0]] = None
                     mod_gameboard[mossa] = pezzo[1]
+                    if pezzo[1].get_type() == 'K':
+                        if self.w_kingside_cast:
+                            if check_kingside_cast(0, self.gameboard, self):
+                                da_ritornare.append('e1g1')
+                        if self.w_queenside_cast:
+                            if check_queenside_cast(0, self.gameboard, self):
+                                da_ritornare.append('e1c1')
                     if not check_check((not pezzo[1].get_color()), mod_gameboard, self):
                         if mossa[1] == 7 and pezzo[1].get_type() == 'P':
                             for i in 'qrbn':
@@ -774,6 +781,13 @@ class Game:
                     del mod_gameboard[pezzo[0]]
                     mod_gameboard[pezzo[0]] = None
                     mod_gameboard[mossa] = pezzo[1]
+                    if pezzo[1].get_type() == 'k':
+                        if self.b_kingside_cast:
+                            if check_kingside_cast(0, self.gameboard, self):
+                                da_ritornare.append('e1g1')
+                        if self.b_queenside_cast:
+                            if check_queenside_cast(0, self.gameboard, self):
+                                da_ritornare.append('e1c1')
                     if not check_check((not pezzo[1].get_color()), mod_gameboard, self):
                         if mossa[1] == 0 and pezzo[1].get_type() == 'p':
                             for i in 'qrbn':
