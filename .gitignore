@@ -1,5 +1,12 @@
 .DS_Store
-board/__pycache__/
+src/board/__pycache__/
+src/board/logs/
+data/model/
+data/play_data/
+logs/
+src/ai_non_nostra/__pycache__/
+src/training/__pycache__/
+src/ai/__pycache__/
 chess.code-workspace
-board/scores.txt
+src/board/scores.txt
 .vscode
