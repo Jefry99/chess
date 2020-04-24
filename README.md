@@ -13,31 +13,31 @@ Clone the repository with <code>git clone https://github.com/Jefry99/chess</code
 <br>
 <pre>
 git clone https://github.com/Jefry99/chess
-cd board
 </pre>
 
 Start by running:
 
 <pre>
-python board.py
-</pre>
-<br>
-For the developers argument <code>-d</code> start directly a game.<br>
-<br>
-<pre>
-python board.py -d
+python run.py
 </pre>
 <br>
 <h2>To train the nns:</h2><br>
 
-Run self_play to create the batch of game to tran the nns:<br>
+Self_play create the batch of game to tran the nns:<br>
 
 <pre>
-python self_play.py
+python run.py self
 </pre>
 <br>
 And then run the optimizer to update the weights:<br>
 <br>
 <pre>
-python optimize.py
+python run.py opt
 </pre>
+<br>
+To evaluate which model is better between the current one and the last one of the next gen:<br>
+<br>
+<pre>
+python run.py eval
+</pre>
+This comand start 50 game between the model and save the winner as best model.
