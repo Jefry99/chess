@@ -9,7 +9,8 @@ if __name__ == '__main__':
             from src.training.optimize import main
             main()
         elif str(sys.argv[1]) == 'eval':
-            pass
+            from src.training.valuta import main
+            main()
         else:
             print('ma che cazzo di parametri metti?')
             exit()
