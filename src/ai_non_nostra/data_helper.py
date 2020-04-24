@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 from glob import glob
 
-from ai_non_nostra.config import ResourceConfig
+from src.ai_non_nostra.config import ResourceConfig
 
 def get_game_data_filenames(rc: ResourceConfig):
     pattern = os.path.join(rc.play_data_dir, rc.play_data_filename_tmpl % "*")

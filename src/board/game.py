@@ -1,4 +1,4 @@
-from pieces import Pawn, King, Queen, Bishop, Knight, Rook, En_passant
+from src.board.pieces import Pawn, King, Queen, Bishop, Knight, Rook, En_passant
 import copy
 import numpy as np
 #WHITE = 0

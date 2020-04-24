@@ -10,11 +10,11 @@ from random import shuffle
 
 import numpy as np
 
-from game import cnn_input, black_turn, testeval
-from ai_non_nostra.model_chess import ChessModel
-from ai_non_nostra.config import Config
-from ai_non_nostra.data_helper import get_game_data_filenames, read_game_data_from_file, get_next_generation_model_dirs
-from ai_non_nostra.model_helper import load_best_model_weight
+from src.board.game import cnn_input, black_turn, testeval
+from src.ai_non_nostra.model_chess import ChessModel
+from src.ai_non_nostra.config import Config
+from src.ai_non_nostra.data_helper import get_game_data_filenames, read_game_data_from_file, get_next_generation_model_dirs
+from src.ai_non_nostra.model_helper import load_best_model_weight
 
 from keras.optimizers import Adam
 from keras.callbacks import TensorBoard
@@ -188,5 +188,5 @@ def convert_to_cheating_data(data):
 
     return np.asarray(state_list, dtype=np.float32), np.asarray(policy_list, dtype=np.float32), np.asarray(value_list, dtype=np.float32)
 
-if __name__ == '__main__':
+def main():
     OptimizeWorker(Config()).start()

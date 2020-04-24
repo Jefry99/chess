@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import *
-from game import *
+from src.board.game import Game, ai_move
 import numpy as np
-from notation import return_notation
+from src.board.notation import return_notation
 from collections import defaultdict
 import copy
 import sys
@@ -11,10 +11,10 @@ import csv
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-from ai_non_nostra.config import Config
-from ai_non_nostra.player_chess import ChessPlayer
+from src.ai_non_nostra.config import Config
+from src.ai_non_nostra.player_chess import ChessPlayer
 from multiprocessing import Manager
-from ai_non_nostra.model_helper import load_best_model_weight, save_as_best_model
+from src.ai_non_nostra.model_helper import load_best_model_weight, save_as_best_model
 
 # QUESTO E' IL CODICE MODIFICATO AL FINE DI INTRODURRE UNA AI DI CREAZIONE NON NOSTRA ALL'INTERNO DEL CODICE
 
@@ -48,7 +48,7 @@ class SelfPlayWorker:
         Load the current best model
         :return ChessModel: current best model
         """
-        from ai_non_nostra.model_chess import ChessModel
+        from src.ai_non_nostra.model_chess import ChessModel
         model = ChessModel(self.config)
         if not load_best_model_weight(model):
             model.build()
@@ -172,9 +172,9 @@ class CreateCanvasObject(object):
                     pass
                 if self.scacchiera.game.check:
                     if not self.scacchiera.game.color_check:
-                        self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_b_k[0]), 35+70*(7-self.scacchiera.game.pos_b_k[1]), self)
+                        self.scacchiera.check_tracker = DisplayMove(self.canvas, 'src/board/png/Check.png', 35+70*(self.scacchiera.game.pos_b_k[0]), 35+70*(7-self.scacchiera.game.pos_b_k[1]), self)
                     else:
-                        self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_w_K[0]), 35+70*(7-self.scacchiera.game.pos_w_K[1]), self)
+                        self.scacchiera.check_tracker = DisplayMove(self.canvas, 'src/board/png/Check.png', 35+70*(self.scacchiera.game.pos_w_K[0]), 35+70*(7-self.scacchiera.game.pos_w_K[1]), self)
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
                 self.scacchiera.delete_trackers()
                 if self.scacchiera.num_mosse % 2 == 0:
@@ -205,11 +205,11 @@ class CreateCanvasObject(object):
                 self.scacchiera.game.after_promotion(self.scacchiera.promozione)
                 if self.scacchiera.game.check:
                     if not self.scacchiera.game.color_check:
-                        self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_b_k[0]), 35+70*(7-self.scacchiera.game.pos_b_k[1]), self)
+                        self.scacchiera.check_tracker = DisplayMove(self.canvas, 'src/board/png/Check.png', 35+70*(self.scacchiera.game.pos_b_k[0]), 35+70*(7-self.scacchiera.game.pos_b_k[1]), self)
                     else:
-                        self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_w_K[0]), 35+70*(7-self.scacchiera.game.pos_w_K[1]), self)
+                        self.scacchiera.check_tracker = DisplayMove(self.canvas, 'src/board/png/Check.png', 35+70*(self.scacchiera.game.pos_w_K[0]), 35+70*(7-self.scacchiera.game.pos_w_K[1]), self)
                 self.scacchiera.put_piece(self.scacchiera.game.make_matrix())
-                a = CreateCanvasObject(self.canvas, 'png/{}.png'.format(pezzi[self.scacchiera.promozione]), 35+70*self.to[0], 35+70*(7-self.to[1]), self.scacchiera, self.tipo, self.player)
+                a = CreateCanvasObject(self.canvas, 'src/board/png/{}.png'.format(pezzi[self.scacchiera.promozione]), 35+70*self.to[0], 35+70*(7-self.to[1]), self.scacchiera, self.tipo, self.player)
                 self.scacchiera.pezzi.append(a)
                 self.scacchiera.delete_trackers()
                 if self.scacchiera.num_mosse % 2 == 0:
@@ -240,10 +240,10 @@ class CreateCanvasObject(object):
                 if var == 4:
                     print('Vince il bianco')
                     self.scacchiera.update_scores(0)
-                    self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_b_k[0]), 35+70*(7-self.scacchiera.game.pos_b_k[1]), self)
+                    self.scacchiera.check_tracker = DisplayMove(self.canvas, 'src/board/png/Check.png', 35+70*(self.scacchiera.game.pos_b_k[0]), 35+70*(7-self.scacchiera.game.pos_b_k[1]), self)
                 elif var == 5:
                     print('Vince il nero')
-                    self.scacchiera.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.scacchiera.game.pos_w_K[0]), 35+70*(7-self.scacchiera.game.pos_w_K[1]), self)
+                    self.scacchiera.check_tracker = DisplayMove(self.canvas, 'src/board/png/Check.png', 35+70*(self.scacchiera.game.pos_w_K[0]), 35+70*(7-self.scacchiera.game.pos_w_K[1]), self)
                     self.scacchiera.update_scores(1)
                 else:
                     print('Patta')
@@ -275,7 +275,6 @@ class Scacchiera(Frame):
         self.window = None
         self.frame2 = None
         self.frame3 = None
-        self.frame4 = None
         self.frame5 = None
         self.frame6 = None
         self.frame7 = None
@@ -299,7 +298,6 @@ class Scacchiera(Frame):
         self.n_partite = None
         self.trackers = []
         self.check_tracker = None
-        self.developer_mode = False
         self.text_area = None
         self.num_mosse = 0
         self.num_mosse_da_scrivere = 0
@@ -319,9 +317,9 @@ class Scacchiera(Frame):
         pezzo.tipo = tipo
         for move in moves:
             if move[1]:
-                a = DisplayMove(self.canvas, 'png/Capture.png', 35+70*(move[0][0]), 35+70*(7-move[0][1]), self, pezzo)
+                a = DisplayMove(self.canvas, 'src/board/png/Capture.png', 35+70*(move[0][0]), 35+70*(7-move[0][1]), self, pezzo)
             else:
-                a = DisplayMove(self.canvas, 'png/AvaiableMove.png', 35+70*(move[0][0]), 35+70*(7-move[0][1]), self, pezzo)
+                a = DisplayMove(self.canvas, 'src/board/png/AvaiableMove.png', 35+70*(move[0][0]), 35+70*(7-move[0][1]), self, pezzo)
             self.trackers.append(a)
 
     def disable_buttons(self):
@@ -433,7 +431,7 @@ class Scacchiera(Frame):
             self.running_timer = self.white_timer
 
     def update_scores(self, score):
-        with open('scores.txt', 'a') as f:
+        with open('src/board/scores.txt', 'a') as f:
             if score == 0:
                 f.write('\n1,0')
             elif score == 1:
@@ -454,13 +452,13 @@ class Scacchiera(Frame):
     def load_score(self):
         columns = defaultdict(list)
         try:
-            with open('scores.txt') as f:
+            with open('src/board/scores.txt') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     for (k,v) in row.items(): 
                         columns[k].append(v)
         except:
-            f = open('scores.txt', 'w+')
+            f = open('src/board/scores.txt', 'w+')
             f.write('Player 1,Player 2')
             f.close()
             self.load_score()
@@ -493,10 +491,10 @@ class Scacchiera(Frame):
         self.frame6 = Frame(self.window, bg='white', height=90, width=420)
         self.frame6.grid(row=0, column=0)
         if not self.game.player_turn:
-            self.img.append(tk.PhotoImage(file='png/WhiteQueen.png'))
-            self.img.append(tk.PhotoImage(file='png/WhiteRook.png'))
-            self.img.append(tk.PhotoImage(file='png/WhiteBishop.png'))
-            self.img.append(tk.PhotoImage(file='png/WhiteKnight.png'))
+            self.img.append(tk.PhotoImage(file='src/board/png/WhiteQueen.png'))
+            self.img.append(tk.PhotoImage(file='src/board/png/WhiteRook.png'))
+            self.img.append(tk.PhotoImage(file='src/board/png/WhiteBishop.png'))
+            self.img.append(tk.PhotoImage(file='src/board/png/WhiteKnight.png'))
             a = Label(self.frame6, image=self.img[0])
             a.grid(row=0, column=0)
             a.bind("<Button-1>", lambda e,x = 'Q': self.after_selection(x))
@@ -510,10 +508,10 @@ class Scacchiera(Frame):
             d.grid(row=0, column=3)
             d.bind("<Button-1>", lambda e,x = 'N': self.after_selection(x))
         else:
-            self.img.append(tk.PhotoImage(file='png/BlackQueen.png'))
-            self.img.append(tk.PhotoImage(file='png/BlackRook.png'))
-            self.img.append(tk.PhotoImage(file='png/BlackBishop.png'))
-            self.img.append(tk.PhotoImage(file='png/BlackKnight.png'))
+            self.img.append(tk.PhotoImage(file='src/board/png/BlackQueen.png'))
+            self.img.append(tk.PhotoImage(file='src/board/png/BlackRook.png'))
+            self.img.append(tk.PhotoImage(file='src/board/png/BlackBishop.png'))
+            self.img.append(tk.PhotoImage(file='src/board/png/BlackKnight.png'))
             a = Label(self.frame6, image=self.img[0])
             a.grid(row=0, column=0)
             a.bind("<Button-1>", lambda e,x = 'q': self.after_selection(x))
@@ -618,7 +616,7 @@ class Scacchiera(Frame):
             for j in range(8):
                 coso = matrix[i][7-j]
                 if coso != '-':
-                    path = 'png/' + pezzi[coso] + '.png'
+                    path = 'src/board/png/' + pezzi[coso] + '.png'
                     if coso in 'RNBQKP':
                         a = CreateCanvasObject(self.canvas, path, 35+70*(7-j), 35+70*(7-i), self, coso, 'player')
                     else:
@@ -631,8 +629,6 @@ class Scacchiera(Frame):
     def make(self, mode):
         self.frame2.grid(row=0, column=1)
         self.frame3.grid(row=1, column=0)
-        if self.developer_mode:
-            self.frame4.grid(row=2, column=0)
         self.frame7.grid(row=0, column=2, rowspan=2)
         cont = 0
         num = 0
@@ -690,10 +686,6 @@ class Scacchiera(Frame):
         h6.pack(fill = BOTH, expand = True)
         h7.pack(fill = BOTH, expand = True)
         h8.pack(fill = BOTH, expand = True)
-        if self.developer_mode:
-            Button(self.frame4, text='RESET', font=('Helvetica', 20), command=self.reset_all, padx=20).grid(row=0, column=0)
-            Frame(self.frame4, bg=BACKGROUND, width=100).grid(row=0, column=1)
-            Button(self.frame4, text='UNDO', font=('Helvetica', 20), command=self.undo, padx=20).grid(row=0, column=2)
         #frame7
         Label(self.frame7, text='Player 2', bg=BACKGROUND, font=('Helvetica', 20), width=10, anchor='w').grid(row=0, column=0, pady=(60,0))
         if not mode:
@@ -768,9 +760,9 @@ class Scacchiera(Frame):
                 pass
             if self.game.check:
                 if not self.game.color_check:
-                    self.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.game.pos_b_k[0]), 35+70*(7-self.game.pos_b_k[1]), self)
+                    self.check_tracker = DisplayMove(self.canvas, 'src/board/png/Check.png', 35+70*(self.game.pos_b_k[0]), 35+70*(7-self.game.pos_b_k[1]), self)
                 else:
-                    self.check_tracker = DisplayMove(self.canvas, 'png/Check.png', 35+70*(self.game.pos_w_K[0]), 35+70*(7-self.game.pos_w_K[1]), self)
+                    self.check_tracker = DisplayMove(self.canvas, 'src/board/png/Check.png', 35+70*(self.game.pos_w_K[0]), 35+70*(7-self.game.pos_w_K[1]), self)
             self.put_piece(self.game.make_matrix())
             self.delete_trackers()
             if self.num_mosse % 2 == 0:
@@ -785,15 +777,8 @@ class Scacchiera(Frame):
             self.text_area['state'] = 'disabled'
             self.canvas.config(state='normal')
 
+def main():
+    Scacchiera().home.mainloop()
+
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        if str(sys.argv[1]) == '-d':
-            a = Scacchiera()
-            a.developer_mode = True
-            a.nuova_partita(0)
-            a.home.mainloop()
-        else:
-            print('ma che cazzo di parametri metti?')
-            exit()
-    else:
-        Scacchiera().home.mainloop()
+    main()

@@ -4,16 +4,13 @@ making / training predictions.
 """
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from logging import getLogger
 from threading import Lock
 
 import numpy as np
 import copy
 
-from game import Game, Winner, cnn_input, ai_move
-from ai_non_nostra.config import Config
-
-logger = getLogger(__name__)
+from src.board.game import Game, Winner, cnn_input, ai_move
+from src.ai_non_nostra.config import Config
 
 
 # these are from AGZ nature paper

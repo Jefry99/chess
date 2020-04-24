@@ -15,8 +15,8 @@ from keras.layers.merge import Add
 from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
 
-from ai_non_nostra.config import Config
-from ai_non_nostra.api_chess import ChessModelAPI
+from src.ai_non_nostra.config import Config
+from src.ai_non_nostra.api_chess import ChessModelAPI
 
 # noinspection PyPep8Naming
 

@@ -1,6 +1,4 @@
-"""
-Holds the worker which trains the chess model using self play data.
-"""
+
 import os
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor
@@ -10,22 +8,14 @@ from multiprocessing import Manager
 from threading import Thread
 from time import time
 
-from chess_zero.agent.model_chess import ChessModel
-from chess_zero.agent.player_chess import ChessPlayer
-from chess_zero.config import Config
-from chess_zero.env.chess_env import ChessEnv, Winner
-from chess_zero.lib.data_helper import get_game_data_filenames, write_game_data_to_file, pretty_print
-from chess_zero.lib.model_helper import load_best_model_weight, save_as_best_model, \
-    reload_best_model_weight_if_changed
+from src.board.game import Game, cnn_input, Winner, ai_move
+from src.ai_non_nostra.config import Config
+from src.ai_non_nostra.player_chess import ChessPlayer
+from multiprocessing import Manager
+from src.ai_non_nostra.model_helper import load_best_model_weight, save_as_best_model, reload_best_model_weight_if_changed
+from src.ai_non_nostra.model_chess import ChessModel
+from src.ai_non_nostra.data_helper import write_game_data_to_file, get_game_data_filenames
 
-logger = getLogger(__name__)
-
-
-def start(config: Config):
-    return SelfPlayWorker(config).start()
-
-
-# noinspection PyAttributeOutsideInit
 class SelfPlayWorker:
     """
     Worker which trains a chess model using self play data. ALl it does is do self play and then write the
@@ -55,22 +45,25 @@ class SelfPlayWorker:
 
         futures = deque()
         with ProcessPoolExecutor(max_workers=self.config.play.max_processes) as executor:
-            for game_idx in range(self.config.play.max_processes * 2):
+            for game_idx in range(self.config.play.max_processes):
                 futures.append(executor.submit(self_play_buffer, self.config, cur=self.cur_pipes))
             game_idx = 0
             while True:
                 game_idx += 1
-                start_time = time()
-                env, data = futures.popleft().result()
+                data = futures.popleft().result()
+                '''
                 print(f"game {game_idx:3} time={time() - start_time:5.1f}s "
                     f"halfmoves={env.num_halfmoves:3} {env.winner:12} "
                     f"{'by resign ' if env.resigned else '          '}")
+                '''
 
-                pretty_print(env, ("current_model", "current_model"))
                 self.buffer += data
+                self.flush_buffer()
+                '''
                 if (game_idx % self.config.play_data.nb_game_in_file) == 0:
                     self.flush_buffer()
                     reload_best_model_weight_if_changed(self.current_model)
+                '''
                 futures.append(executor.submit(self_play_buffer, self.config, cur=self.cur_pipes)) # Keep it going
 
         if len(data) > 0:
@@ -91,13 +84,14 @@ class SelfPlayWorker:
         """
         Flush the play data buffer and write the data to the appropriate location
         """
+        print('salvo su file')
         rc = self.config.resource
         game_id = datetime.now().strftime("%Y%m%d-%H%M%S.%f")
         path = os.path.join(rc.play_data_dir, rc.play_data_filename_tmpl % game_id)
-        logger.info(f"save play data to {path}")
         thread = Thread(target=write_game_data_to_file, args=(path, self.buffer))
         thread.start()
         self.buffer = []
+        print('finito salvataggio')
 
     def remove_play_data(self):
         """
@@ -110,7 +104,7 @@ class SelfPlayWorker:
             os.remove(files[i])
 
 
-def self_play_buffer(config, cur) -> (ChessEnv, list):
+def self_play_buffer(config, cur) -> (list):
     """
     Play one game and add the play data to the buffer
     :param Config config: config for how to play
@@ -120,18 +114,21 @@ def self_play_buffer(config, cur) -> (ChessEnv, list):
         of data to be appended to the SelfPlayWorker.buffer
     """
     pipes = cur.pop() # borrow
-    env = ChessEnv().reset()
+    env = Game()
 
     white = ChessPlayer(config, pipes=pipes)
     black = ChessPlayer(config, pipes=pipes)
 
-    while not env.done:
-        if env.white_to_move:
+    while not env.done():
+        if env.white_to_move():
             action = white.action(env)
         else:
             action = black.action(env)
-        env.step(action)
-        if env.num_halfmoves >= config.play.max_game_length:
+
+        move = ai_move(action)
+        env.check_move(move[0], move[1], promotion=move[2])
+
+        if env.num_move >= config.play.max_game_length:
             env.adjudicate()
 
     if env.winner == Winner.white:
@@ -150,5 +147,10 @@ def self_play_buffer(config, cur) -> (ChessEnv, list):
         if i < len(black.moves):
             data.append(black.moves[i])
 
+    env.print_board()
     cur.append(pipes)
-    return env, data
+    return data
+
+def main():
+    SelfPlayWorker(Config()).start()
+    

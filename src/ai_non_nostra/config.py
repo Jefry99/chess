@@ -149,7 +149,7 @@ class Config:
         """
         self.opts = Options()
         self.resource = ResourceConfig()
-        import ai_non_nostra.mini as c
+        import src.ai_non_nostra.mini as c
         '''
         if config_type == "mini":
             import chess_zero.configs.mini as c
@@ -189,7 +189,7 @@ Config.unflipped_index = [Config.labels.index(x) for x in Config.flipped_labels]
 
 def _project_dir():
     d = os.path.dirname
-    return d(d(os.path.abspath(__file__)))
+    return d(d(d(os.path.abspath(__file__))))
 
 
 def _data_dir():

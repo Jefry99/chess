@@ -8,7 +8,7 @@ from threading import Thread
 
 import numpy as np
 
-from ai_non_nostra.config import Config
+from src.ai_non_nostra.config import Config
 
 
 class ChessModelAPI:
