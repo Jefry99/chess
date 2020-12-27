@@ -9,7 +9,9 @@ import os
 
 from tensorflow.keras import Input, Model
 from tensorflow.keras.layers import Conv2D, Dense, Flatten, Activation, Add, BatchNormalization
-from tensorflow.keras.regularizers import L2 as l2
+#from tensorflow.keras.regularizers import L2 as l2
+from tensorflow.keras.regularizers import l2
+from tensorflow.keras.models import model_from_json
 
 from src.ai_non_nostra.config import Config
 from src.ai_non_nostra.api_chess import ChessModelAPI
@@ -121,9 +123,9 @@ class ChessModel:
         """
         if os.path.exists(config_path) and os.path.exists(weight_path):
             with open(config_path, "rt") as f:
-                self.model = Model.from_config(json.load(f))
+                self.model = model_from_json(json.load(f))
             self.model.load_weights(weight_path)
-            self.model._make_predict_function()
+            self.model.make_predict_function()
             self.digest = self.fetch_digest(weight_path)
             return True
         else:
@@ -136,6 +138,6 @@ class ChessModel:
         :param str weight_path: path to save the model weights to
         """
         with open(config_path, "wt") as f:
-            json.dump(self.model.get_config(), f)
+            json.dump(self.model.to_json(), f)
             self.model.save_weights(weight_path)
         self.digest = self.fetch_digest(weight_path)

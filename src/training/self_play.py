@@ -13,7 +13,7 @@ from src.ai_non_nostra.config import Config
 from src.ai_non_nostra.player_chess import ChessPlayer
 from multiprocessing import Manager
 from src.ai_non_nostra.model_helper import load_best_model_weight, save_as_best_model, reload_best_model_weight_if_changed
-from src.ai_non_nostra.model_chess import ChessModel
+from src.ai_non_nostra.model_chess_tf import ChessModel
 from src.ai_non_nostra.data_helper import write_game_data_to_file, get_game_data_filenames
 
 class SelfPlayWorker:
@@ -126,6 +126,7 @@ def self_play_buffer(config, cur) -> (list):
             action = black.action(env)
 
         move = ai_move(action)
+        print(move)
         env.check_move(move[0], move[1], promotion=move[2])
 
         if env.num_move >= config.play.max_game_length:

@@ -48,7 +48,7 @@ class SelfPlayWorker:
         Load the current best model
         :return ChessModel: current best model
         """
-        from src.ai_non_nostra.model_chess import ChessModel
+        from src.ai_non_nostra.model_chess_tf import ChessModel
         model = ChessModel(self.config)
         if not load_best_model_weight(model):
             model.build()

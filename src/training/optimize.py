@@ -11,13 +11,13 @@ from random import shuffle
 import numpy as np
 
 from src.board.game import cnn_input, black_turn, testeval
-from src.ai_non_nostra.model_chess import ChessModel
+from src.ai_non_nostra.model_chess_tf import ChessModel
 from src.ai_non_nostra.config import Config
 from src.ai_non_nostra.data_helper import get_game_data_filenames, read_game_data_from_file, get_next_generation_model_dirs
 from src.ai_non_nostra.model_helper import load_best_model_weight
 
-from keras.optimizers import Adam
-from keras.callbacks import TensorBoard
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import TensorBoard
 
 class OptimizeWorker:
     """

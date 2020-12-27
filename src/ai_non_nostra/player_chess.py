@@ -257,7 +257,7 @@ class ChessPlayer:
         return ret
     
     #@profile
-    def select_action_q_and_u(self, env: Game, is_root_node) -> str:
+    def select_action_q_and_u(self, env: Game, is_root_node): # -> str
         """
         Picks the next action to explore using the AGZ MCTS algorithm.
 
@@ -301,6 +301,7 @@ class ChessPlayer:
                 p_ = (1-e) * p_ + e * noise[i]
                 i += 1
             b = a_s.q + c_puct * p_ * xx_ / (1 + a_s.n)
+            #print(str(b) + ' / ' + str(best_s))
             if b > best_s:
                 best_s = b
                 best_a = action

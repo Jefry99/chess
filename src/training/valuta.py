@@ -4,7 +4,7 @@ from multiprocessing import Manager
 from time import sleep
 
 from src.board.game import Game, cnn_input, Winner, ai_move
-from src.ai_non_nostra.model_chess import ChessModel
+from src.ai_non_nostra.model_chess_tf import ChessModel
 from src.ai_non_nostra.player_chess import ChessPlayer
 from src.ai_non_nostra.config import Config
 from src.ai_non_nostra.data_helper import get_next_generation_model_dirs
@@ -100,6 +100,7 @@ class EvaluateWorker:
         Loads the best model from the standard directory.
         :return ChessModel: the model
         """
+        print('carico best model')
         model = ChessModel(self.config)
         load_best_model_weight(model)
         return model
@@ -109,6 +110,7 @@ class EvaluateWorker:
         Loads the next generation model from the standard directory
         :return (ChessModel, file): the model and the directory that it was in
         """
+        print('carico ultimo next gen model')
         rc = self.config.resource
         while True:
             dirs = get_next_generation_model_dirs(self.config.resource)
@@ -136,6 +138,7 @@ def play_game(config, cur, ng, current_white: bool) -> (float, bool):
         (0 for loss, .5 for draw, 1 for win), the env after the game is finished, and a bool
         which is true iff cur played as white in that game.
     """
+    print('inizio nuovo game')
     cur_pipes = cur.pop()
     ng_pipes = ng.pop()
     env = Game()
@@ -147,7 +150,7 @@ def play_game(config, cur, ng, current_white: bool) -> (float, bool):
     else:
         white, black = ng_player, current_player
     while not env.done():
-        if env.white_to_move:
+        if env.white_to_move():
             action = white.action(env)
         else:
             action = black.action(env)
